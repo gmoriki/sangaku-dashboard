@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>産学連携ダッシュボード</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+    <style>
+        /* ============================================================
+           Phase 7: Design Tokens
+           ============================================================ */
+        :root {
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Noto Sans JP', sans-serif;
+            --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px; --radius-full: 9999px;
+            --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.03);
+            --shadow-md: 0 4px 12px rgba(0,0,0,.07);
+            --shadow-lg: 0 12px 24px rgba(0,0,0,.1);
+            --sidebar-width: 240px;
+            --blue-50:#E8F1FE;--blue-100:#D9E6FF;--blue-200:#C5D7FB;--blue-400:#7096F8;--blue-600:#3460FB;--blue-900:#0017C1;--blue-1200:#000060;
+            --orange-500:#FB5B01;--green-600:#259D63;--cyan-600:#00A3BF;
+            --red-600:#FE3939;--red-50:#FEF2F2;
+        }
+
+        /* Phase 1: Light theme */
+        [data-theme="light"] {
+            --bg: #F5F6FA; --card: #FFFFFF; --card-hover: #FAFBFF;
+            --text: #111827; --text-2: #6B7280; --text-3: #9CA3AF;
+            --border: #E5E7EB; --border-2: #F3F4F6;
+            --sidebar-bg: #FFFFFF; --sidebar-text: #6B7280; --sidebar-active: #111827; --sidebar-border: #E5E7EB;
+            --sidebar-active-bg: var(--blue-50); --sidebar-active-text: var(--blue-900); --sidebar-active-border: var(--blue-600);
+            --chart-line: #0017C1; --chart-line-fill-top: rgba(0,23,193,.12); --chart-line-fill-bottom: rgba(0,23,193,.01);
+            --chart-grid: #F0F1F5; --chart-text: #6B7280;
+            --input-bg: #fff; --badge-bg: rgba(255,255,255,.12);
+            --kpi-fill: rgba(0,23,193,.06);
+            --badge-pos-text: #0017C1; --badge-pos-bg: #E8F1FE;
+            --badge-neg-text: #DC2626; --badge-neg-bg: #FEF2F2;
+            --badge-neu-text: #6B7280; --badge-neu-bg: #F3F4F6;
+        }
+
+        /* Phase 1: Dark theme */
+        [data-theme="dark"] {
+            --bg: #0F1117; --card: #1C2030; --card-hover: #252A3A;
+            --text: #EAEDF2; --text-2: #8B92A0; --text-3: #5C6370;
+            --border: #2A3040; --border-2: #1E2333;
+            --sidebar-bg: #13161E; --sidebar-text: #8B92A0; --sidebar-active: #EAEDF2; --sidebar-border: #2A3040;
+            --sidebar-active-bg: rgba(107,147,255,.12); --sidebar-active-text: #fff; --sidebar-active-border: #6B93FF;
+            --chart-line: #6B93FF; --chart-line-fill-top: rgba(107,147,255,.20); --chart-line-fill-bottom: rgba(107,147,255,.02);
+            --chart-grid: #2A3040; --chart-text: #8B92A0;
+            --input-bg: #1E2333; --badge-bg: rgba(255,255,255,.06);
+            --kpi-fill: rgba(52,96,251,.15);
+            --blue-50: #172554; --blue-100: #1E3A7A; --blue-200: #264694;
+            --red-50: #3B1520;
+            --badge-pos-text: #93C5FD; --badge-pos-bg: #1E3A5F;
+            --badge-neg-text: #FCA5A5; --badge-neg-bg: #4C1D1D;
+            --badge-neu-text: #8B92A0; --badge-neu-bg: #2A3040;
+        }
+
+        /* ============================================================
+           Reset & Base (Phase 3: Typography)
+           ============================================================ */
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{height:100%;font-family:var(--font-body);-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;transition:background .3s,color .3s;overflow-x:hidden}
+        #root{min-height:100vh}
+        .app{display:flex;min-height:100vh}
+
+        /* ============================================================
+           Phase 4: Animations
+           ============================================================ */
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        .anim-in{animation:fadeIn .4s ease-out both}
+        .anim-delay-1{animation-delay:.05s}.anim-delay-2{animation-delay:.1s}.anim-delay-3{animation-delay:.15s}.anim-delay-4{animation-delay:.2s}.anim-delay-5{animation-delay:.25s}
+
+        /* ============================================================
+           Sidebar
+           ============================================================ */
+        .sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s,background .3s,color .3s;border-right:1px solid var(--sidebar-border)}
+        .sidebar-header{padding:24px 24px 20px;border-bottom:1px solid var(--sidebar-border)}
+        .sidebar-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--sidebar-active);letter-spacing:-.01em;line-height:1.4}
+        .sidebar-subtitle{font-size:12px;color:var(--sidebar-text);margin-top:6px}
+        .sidebar-nav{padding:12px 0;flex:1;overflow-y:auto}
+        .sidebar-item{display:flex;align-items:center;padding:11px 24px;cursor:pointer;font-size:14px;font-weight:500;color:var(--sidebar-text);transition:all .15s;border-left:3px solid transparent;gap:8px}
+        .sidebar-item:hover{background:var(--card-hover);color:var(--sidebar-active)}
+        .sidebar-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);border-left-color:var(--sidebar-active-border);font-weight:600}
+        .sidebar-sep{height:1px;background:var(--sidebar-border);margin:10px 24px}
+        .sidebar-badge{font-size:10px;background:var(--border-2);padding:2px 8px;border-radius:var(--radius-sm);margin-left:auto;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-2)}
+        .sidebar-footer{padding:20px 24px;border-top:1px solid var(--sidebar-border);font-size:11px;color:var(--text-3)}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:40}
+
+        /* サイドバー折りたたみ (56pxアイコンモード) */
+        .sidebar{transition:width 200ms cubic-bezier(0.4,0,0.2,1),transform .3s,background .3s;will-change:width;overflow:hidden}
+        .sidebar-collapse-btn{background:none;border:none;color:var(--sidebar-text);cursor:pointer;padding:10px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;width:100%;border-top:1px solid var(--sidebar-border);transition:color .15s}
+        .sidebar-collapse-btn:hover{color:var(--sidebar-active);background:var(--card-hover)}
+        .sidebar-icon{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+        .sidebar-label{white-space:nowrap;overflow:hidden;transition:opacity 150ms ease,width 150ms ease}
+
+        .sidebar.collapsed{width:56px;min-width:56px}
+        .sidebar.collapsed .sidebar-header{padding:16px 8px;text-align:center}
+        .sidebar.collapsed .sidebar-title,.sidebar.collapsed .sidebar-subtitle,.sidebar.collapsed .sidebar-footer,.sidebar.collapsed .sidebar-badge{display:none}
+        .sidebar.collapsed .sidebar-item{justify-content:center;padding:12px 0;border-left:none;gap:0}
+        .sidebar.collapsed .sidebar-label{opacity:0;width:0;padding:0;margin:0;overflow:hidden}
+        .sidebar.collapsed .sidebar-sep{margin:8px 12px}
+        /* CSS tooltip on hover when collapsed */
+        .sidebar.collapsed .sidebar-item{position:relative}
+        .sidebar.collapsed .sidebar-item::after{content:attr(data-tooltip);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--text);color:var(--bg);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 150ms ease;z-index:100}
+        .sidebar.collapsed .sidebar-item:hover::after{opacity:1}
+
+        .app.sidebar-collapsed .main-content{margin-left:56px}
+
+        .menu-btn{background:none;border:none;color:var(--text-2);cursor:pointer;padding:6px 8px;border-radius:var(--radius-sm);display:flex;align-items:center}
+        .menu-btn:hover{background:var(--border-2);color:var(--text)}
+
+        /* パンくず */
+        .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+        .breadcrumb-sep{display:flex;align-items:center}
+        .breadcrumb-current{color:var(--text);font-weight:600}
+
+        @media(max-width:1023px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.open{display:block}
+            .main-content{margin-left:0!important}
+        }
+
+        /* ============================================================
+           Main Layout
+           ============================================================ */
+        .main-content{flex:1;margin-left:var(--sidebar-width);display:flex;flex-direction:column;min-height:100vh;transition:margin .3s;min-width:0;overflow-x:hidden}
+        .content{flex:1;padding:28px 48px 40px;max-width:840px;margin:0 auto;overflow:hidden;width:100%}
+        @media(min-width:1400px){.content{max-width:960px}}
+        @media(max-width:767px){.content{padding:16px 12px 32px}}
+
+        /* Header */
+        .page-header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
+        .page-header-left{display:flex;align-items:center;gap:14px}
+        .page-title{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.02em}
+        .page-meta{font-size:13px;color:var(--text-2)}
+        .page-header-right{display:flex;align-items:center;gap:12px}
+        .myuni-chip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-full);font-size:13px;color:var(--blue-900);cursor:pointer;font-weight:600;transition:all .15s}
+        .myuni-chip:hover{box-shadow:var(--shadow-sm)}
+        .myuni-chip-set{color:var(--text-3);border:1px dashed var(--border);background:transparent;font-weight:500}
+        @media(max-width:767px){.page-header{padding:12px 16px}.page-title{font-size:20px}.myuni-chip{font-size:11px;padding:5px 10px}}
+
+        /* Phase 1: Theme toggle */
+        .theme-toggle{width:40px;height:40px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .2s}
+        .theme-toggle:hover{background:var(--card-hover);box-shadow:var(--shadow-sm)}
+
+        /* Context bar */
+        .context-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 16px;background:var(--blue-50);border-radius:var(--radius-md);font-size:13px;color:var(--blue-900);font-weight:500}
+        .context-bar .ctx-clear{cursor:pointer;margin-left:auto;text-decoration:underline;font-weight:400}
+
+        /* Filters */
+        .filter-bar{display:flex;align-items:flex-end;gap:20px;margin-bottom:24px;flex-wrap:wrap}
+        .filter-group{display:flex;flex-direction:column;gap:5px}
+        .filter-label{font-size:12px;color:var(--text-2);font-weight:600;letter-spacing:.02em}
+        .filter-select,.filter-input{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:14px;font-family:var(--font-body);background:var(--input-bg);color:var(--text);min-width:0;width:100%;transition:border .15s}
+        .filter-group{flex:1;min-width:100px}
+        .filter-select:focus,.filter-input:focus{outline:none;border-color:var(--blue-600);box-shadow:0 0 0 3px var(--blue-50)}
+        .search-wrapper{position:relative}
+        .autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:0 0 var(--radius-md) var(--radius-md);box-shadow:var(--shadow-lg);z-index:20;max-height:360px;overflow-y:auto}
+        .ac-group-label{padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-3);background:var(--border-2);letter-spacing:.05em}
+        .autocomplete-item{padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border-2);display:flex;align-items:center;justify-content:space-between;transition:background .1s}
+        .autocomplete-item:hover{background:var(--card-hover)}
+        .autocomplete-item-name{font-size:14px;font-weight:600}.autocomplete-item-meta{font-size:12px;color:var(--text-2)}
+        .ac-btn{font-size:11px;padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);background:var(--card);font-family:var(--font-body);font-weight:500;white-space:nowrap;transition:all .15s;color:var(--text)}
+        .ac-btn:hover{background:var(--card-hover)}.ac-btn.primary{background:var(--blue-900);color:#fff;border-color:var(--blue-900)}.ac-btn.primary:hover{opacity:.9}
+
+        /* ============================================================
+           Phase 5: KPI Bento Grid
+           ============================================================ */
+        .kpi-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+        .kpi-card{flex:1 1 150px;min-width:0}
+        @media(max-width:767px){.kpi-card{flex:1 1 calc(50% - 6px)}}
+
+        .kpi-card{background:var(--card);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-xs);border:1.5px solid transparent;position:relative;overflow:hidden}
+        .kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);background:var(--card-hover)}
+        .kpi-card.selected{border-color:var(--blue-900);box-shadow:0 0 0 3px var(--blue-100),var(--shadow-md)}
+        .kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:var(--radius-lg) 0 0 var(--radius-lg)}
+        .kpi-card.signal-up::before{background:var(--blue-600)}.kpi-card.signal-flat::before{background:var(--text-3)}.kpi-card.signal-down::before{background:var(--red-600)}
+        .kpi-label{font-size:13px;color:var(--text-2);font-weight:600;margin-bottom:10px}
+        .kpi-value{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1;margin-bottom:4px;letter-spacing:-.02em}
+        .kpi-change{display:inline-flex;align-items:center;font-size:13px;font-weight:700;padding:3px 10px;border-radius:var(--radius-sm)}
+        .kpi-change.positive{color:var(--badge-pos-text);background:var(--badge-pos-bg)}.kpi-change.negative{color:var(--badge-neg-text);background:var(--badge-neg-bg)}.kpi-change.neutral{color:var(--badge-neu-text);background:var(--badge-neu-bg)}
+        .kpi-rank{display:block;font-size:12px;color:var(--text-2);margin-top:8px}.kpi-note{display:block;font-size:11px;color:var(--red-600);margin-top:4px}
+        .kpi-chart{margin-top:8px;height:36px;width:100%}
+
+        /* Detail panel */
+        .detail-panel{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:28px;margin-bottom:28px;border-top:3px solid var(--blue-900);transition:background .3s}
+        .detail-title{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.02em}
+        .detail-meta{font-size:13px;color:var(--text-2);margin-left:12px}
+
+        /* Charts */
+        .charts-row{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:28px}
+        @media(max-width:900px){.charts-row{grid-template-columns:1fr}}
+        .chart-panel{background:var(--card);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-xs);transition:background .3s}.chart-panel.full{margin-bottom:28px}
+        .chart-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:4px;letter-spacing:-.01em}
+        .chart-subtitle{font-size:12px;color:var(--text-2);margin-bottom:18px}.chart-note{font-size:11px;color:var(--red-600);margin-bottom:10px}
+        .chart-canvas-wrapper{position:relative;width:100%}.chart-canvas-wrapper.trend{height:300px}.chart-canvas-wrapper.small{height:260px}.chart-canvas-wrapper.radar{height:380px}
+        @media(max-width:767px){.chart-canvas-wrapper.trend{height:220px}.chart-canvas-wrapper.small{height:200px}.chart-canvas-wrapper.radar{height:280px}}
+
+        /* Table (shadcn/ui) */
+        .table-panel{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);overflow:hidden;margin-bottom:28px;transition:background .3s}
+        .table-toolbar{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+        .table-title{font-family:var(--font-display);font-size:17px;font-weight:700}.table-count{font-size:13px;color:var(--text-2)}
+        .table-search{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;font-family:var(--font-body);width:220px;background:var(--input-bg);color:var(--text);transition:border .15s}
+        .table-search:focus{outline:none;border-color:var(--blue-600);box-shadow:0 0 0 3px var(--blue-50)}
+        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+        table{width:100%;border-collapse:collapse;font-size:14px;min-width:700px}
+        thead{background:var(--border-2)}
+        thead th{text-align:left;padding:12px 16px;font-size:11px;font-weight:700;color:var(--text-2);border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
+        thead th.numeric{text-align:right}
+        tbody td{padding:12px 16px;border-bottom:1px solid var(--border-2);color:var(--text);font-variant-numeric:tabular-nums;transition:background .1s}
+        tbody td.numeric{text-align:right;font-family:var(--font-display);font-weight:500}
+        tbody tr:hover{background:var(--blue-50)}
+        td.highlight{background:var(--blue-100);font-weight:700;color:var(--blue-900)}
+        .pagination{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 24px;border-top:1px solid var(--border)}
+        .pagination-btn{padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;color:var(--text);transition:all .15s}
+        .pagination-btn:disabled{opacity:.35;cursor:default}.pagination-btn:not(:disabled):hover{border-color:var(--blue-600);background:var(--blue-50)}
+        .pagination-info{font-size:13px;color:var(--text-2)}
+
+        /* Footer */
+        .dashboard-footer{border-top:1px solid var(--border);padding:20px 40px;font-size:12px;color:var(--text-3);line-height:1.8;transition:background .3s,color .3s}
+        .dashboard-footer a{color:var(--blue-900);text-decoration:none;font-weight:500}
+
+        /* States */
+        .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;color:var(--text-2);font-size:14px}
+        .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue-600);border-radius:50%;animation:pulse 1s ease-in-out infinite;margin-bottom:16px}
+        .error-banner{background:var(--red-50);border:1px solid var(--red-600);color:var(--red-600);padding:12px 20px;border-radius:var(--radius-md);font-size:14px;margin-bottom:20px}
+        .empty-state{text-align:center;padding:48px;color:var(--text-2);font-size:14px}
+
+        /* MyUni & Compare */
+        .uni-banner{background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-lg);padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
+        .uni-banner-name{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--blue-900);letter-spacing:-.02em}.uni-banner-meta{font-size:13px;color:var(--text-2);margin-left:14px}
+        .btn-sm{padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .15s}.btn-sm:hover{background:var(--card-hover)}.btn-sm.danger{border-color:var(--red-600);color:var(--red-600)}.btn-sm.danger:hover{background:var(--red-50)}
+        .category-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+        .cat-tab{padding:8px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-2);transition:all .15s}
+        .cat-tab:hover{background:var(--card-hover)}.cat-tab.active{background:var(--blue-900);color:#fff;border-color:var(--blue-900);box-shadow:var(--shadow-sm)}
+        .setup-box{max-width:500px;margin:80px auto;text-align:center}.setup-box h2{font-family:var(--font-display);font-size:26px;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}.setup-box p{color:var(--text-2);font-size:14px;margin-bottom:24px}
+        .compare-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+        .compare-slot{background:var(--card);border:2px dashed var(--border);border-radius:var(--radius-lg);padding:16px;min-height:90px;display:flex;flex-direction:column;justify-content:center;position:relative;transition:all .15s}
+        .compare-slot.filled{border-style:solid;box-shadow:var(--shadow-xs)}.compare-slot .slot-name{font-family:var(--font-display);font-size:16px;font-weight:700}.compare-slot .slot-meta{font-size:12px;color:var(--text-2);margin-top:2px}
+        .compare-slot .slot-color{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:8px}
+        .compare-slot .slot-remove{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-3);transition:color .1s}.compare-slot .slot-remove:hover{color:var(--red-600)}
+        .compare-slot .slot-add{text-align:center;color:var(--text-3);cursor:pointer;font-size:14px;font-weight:500;transition:color .15s}.compare-slot .slot-add:hover{color:var(--blue-900)}
+        .comp-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:28px}
+        .comp-kpi-panel{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-xs);transition:background .3s}
+        .comp-kpi-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:12px}
+
+        /* P0-2: Export buttons */
+        .chart-panel{position:relative}
+        .export-btn{position:absolute;top:16px;right:16px;background:var(--card-hover);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;font-size:12px;color:var(--text-2);opacity:0;transition:opacity .2s;font-family:var(--font-body);z-index:5}
+        .chart-panel:hover .export-btn,.detail-panel:hover .export-btn{opacity:1}
+        .export-btn:hover{background:var(--blue-50);color:var(--blue-900);border-color:var(--blue-600)}
+        .csv-btn{padding:6px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:12px;font-family:var(--font-body);color:var(--text-2);transition:all .15s}
+        .csv-btn:hover{background:var(--blue-50);color:var(--blue-900);border-color:var(--blue-600)}
+
+        /* P0-3: Percentile bar */
+        .pbar{display:flex;align-items:center;gap:3px;margin-top:8px}
+        .pbar-dot{width:8px;height:8px;border-radius:2px;background:var(--border);transition:background .2s}
+        .pbar-dot.filled{background:var(--blue-600)}
+        .pbar-dot.filled.top{background:var(--blue-900)}
+        .pbar-label{font-size:11px;color:var(--text-2);margin-left:6px;white-space:nowrap}
+        .trend-icon{font-size:12px;font-weight:800}
+
+        /* P0-1: Executive Summary */
+        .exec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:28px}
+        .exec-card{background:var(--card);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--shadow-xs);border-left:4px solid var(--border);transition:all .2s}
+        .exec-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+        .exec-card.strength{border-left-color:var(--blue-600)}
+        .exec-card.caution{border-left-color:var(--red-600)}
+        .exec-card.neutral{border-left-color:var(--text-3)}
+        .exec-cat{font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:6px}
+        .exec-val{font-family:var(--font-display);font-size:28px;font-weight:800;line-height:1.1;margin-bottom:6px;letter-spacing:-.03em}
+        .exec-rank{font-size:12px;color:var(--text-2)}
+        .exec-insight{background:var(--card);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow-xs);margin-bottom:28px;font-size:14px;line-height:1.8;color:var(--text)}
+
+        /* ============================================================
+           Phase 6: Landing Page
+           ============================================================ */
+        .landing{min-height:100vh;background:var(--bg);display:flex;flex-direction:column}
+        .landing-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;max-width:1200px;margin:0 auto;width:100%}
+        .landing-logo{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--text)}
+        .landing-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px 40px}
+        .landing-headline{font-family:var(--font-display);font-size:32px;font-weight:900;line-height:1.3;letter-spacing:-.02em;margin-bottom:12px;color:var(--text)}
+        .landing-sub{font-size:15px;color:var(--text-2);max-width:480px;margin-bottom:0;line-height:1.7}
+        .landing-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--blue-900);color:#fff;border:none;border-radius:var(--radius-lg);font-family:var(--font-display);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-md)}
+        .landing-cta:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+        .landing-stats{display:flex;gap:48px;margin-top:48px;flex-wrap:wrap;justify-content:center}
+        .landing-stat{text-align:center}
+        .landing-stat-num{font-family:var(--font-display);font-size:40px;font-weight:900;color:var(--blue-900);letter-spacing:-.03em}
+        [data-theme="dark"] .landing-stat-num{color:var(--blue-400)}
+        .landing-stat-label{font-size:13px;color:var(--text-2);margin-top:4px}
+        .landing-features{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px;margin:48px auto;padding:0 24px}
+        .landing-feature{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .2s}
+        .landing-feature:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+        .landing-feature:first-child{grid-column:span 2}
+        .landing-feature-icon{font-size:28px;margin-bottom:12px}
+        .landing-feature-title{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:6px}
+        .landing-feature-desc{font-size:14px;color:var(--text-2);line-height:1.6}
+        .landing-footer{text-align:center;padding:32px;font-size:12px;color:var(--text-3)}
+        @media(max-width:767px){.landing-headline{font-size:32px}.landing-sub{font-size:15px}.landing-features{grid-template-columns:1fr}.landing-feature:first-child{grid-column:span 1}.landing-stats{gap:24px}.landing-stat-num{font-size:28px}}
+
+        /* P1-3: PDF/Print */
+        @media print{
+            .sidebar,.sidebar-overlay,.page-header,.filter-bar,.mobile-menu,.theme-toggle,.export-btn,.csv-btn,.pagination,.landing,.setup-box,.context-bar,.cat-tab:not(.active){display:none!important}
+            .main-content{margin-left:0!important}.content{max-width:100%;padding:16px}
+            .kpi-grid{grid-template-columns:repeat(4,1fr)}.kpi-card{break-inside:avoid;box-shadow:none;border:1px solid #ddd}
+            body,[data-theme="dark"]{background:#fff!important;color:#000!important}
+            .chart-panel,.detail-panel,.table-panel,.exec-card,.exec-insight{box-shadow:none;border:1px solid #ddd}
+            .print-header{display:block!important}
+            @page{size:A4 landscape;margin:1cm}
+        }
+        .print-header{display:none;text-align:center;margin-bottom:16px;font-family:var(--font-display);font-size:20px;font-weight:800}
+        .print-btn{padding:6px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:12px;font-family:var(--font-body);color:var(--text-2);transition:all .15s}
+        .print-btn:hover{background:var(--blue-50);color:var(--blue-900)}
+
+        /* P2-5: Skeleton loading */
+        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        .skeleton{background:linear-gradient(90deg,var(--border-2) 25%,var(--border) 50%,var(--border-2) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:var(--radius-md)}
+        .skel-card{height:200px;border-radius:var(--radius-lg)}
+        .skel-chart{height:260px;border-radius:var(--radius-lg)}
+        .skel-text{height:16px;width:60%;margin-bottom:8px}
+        .skel-title{height:24px;width:40%;margin-bottom:16px}
+
+        /* P2-4: Command Palette */
+        .cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:20vh;backdrop-filter:blur(4px)}
+        .cmd-palette{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);width:520px;max-height:400px;overflow:hidden;box-shadow:var(--shadow-lg)}
+        .cmd-input{width:100%;padding:16px 20px;border:none;border-bottom:1px solid var(--border);font-size:16px;font-family:var(--font-body);background:transparent;color:var(--text);outline:none}
+        .cmd-results{max-height:320px;overflow-y:auto}
+        .cmd-item{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .1s}
+        .cmd-item:hover,.cmd-item.active{background:var(--blue-50)}
+        .cmd-item-label{font-size:14px;font-weight:500}.cmd-item-meta{font-size:12px;color:var(--text-2)}
+        .cmd-kbd{font-size:11px;color:var(--text-3);background:var(--border-2);padding:2px 6px;border-radius:4px;margin-left:auto}
+
+        /* P1-4: IP Funnel */
+        .funnel-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+        .funnel-label{width:100px;font-size:13px;font-weight:600;text-align:right;color:var(--text-2);flex-shrink:0}
+        .funnel-track{flex:1;height:28px;background:var(--border-2);border-radius:var(--radius-sm);position:relative;overflow:hidden}
+        .funnel-fill{height:100%;border-radius:var(--radius-sm);transition:width .6s ease-out}
+        .funnel-value{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
+        .funnel-conv{font-size:12px;color:var(--text-2);text-align:right;width:80px;flex-shrink:0}
+
+        /* P1-1: Peer group selector */
+        .peer-selector{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+        .peer-chip{padding:6px 14px;border-radius:var(--radius-full);font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-2);transition:all .15s}
+        .peer-chip:hover{background:var(--card-hover)}.peer-chip.active{background:var(--blue-900);color:#fff;border-color:var(--blue-900)}
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+Chart.register(ChartDataLabels);Chart.defaults.plugins.datalabels={display:false};
+const{useState,useEffect,useRef,useCallback}=React;
+const CATEGORY_KPIS={"概要":["共同研究_件数","共同研究_受入額","受託研究_件数","受託研究_受入額","現存ベンチャー企業数"],"共同研究":["共同研究_件数","共同研究_受入額","共同研究_直接経費","共同研究_間接経費","共同研究_件数_大企業","共同研究_件数_中小企業"],"受託研究":["受託研究_件数","受託研究_受入額","受託研究_直接経費","受託研究_間接経費","受託研究_件数_大企業","受託研究_件数_中小企業"],"治験等":["治験等合計_件数","治験等合計_受入額","治験_件数","治験_受入額","治験以外_件数","治験以外_受入額"],"発明":["発明届出件数","発明_特許出願件数","発明者数_教員","発明者数_学生"],"知的財産":["特許出願_国内","特許出願_外国","特許保有_国内","特許保有_外国","PCT出願件数"],"特許権実施許諾":["実施許諾_国内_権利数","実施許諾_外国_権利数","実施許諾収入_国内","実施許諾収入_外国"],"ベンチャー":["現存ベンチャー企業数","ベンチャー設立_当年度","ベンチャーExit_IPO_当年度","ベンチャーExit_MA_当年度"],"寄附金・URA":["寄附金_件数","寄附金_受入額","寄附講座数","寄附講座_受入額","URA_専念専従"]};
+const SIDEBAR_ITEMS=["概要","共同研究","受託研究","治験等","発明","知的財産","特許権実施許諾","ベンチャー","寄附金・URA"];
+const YL=["H30","R1","R2","R3","R4","R5","R6"];const YLL=["2018年度","2019年度","2020年度","2021年度","2022年度","2023年度","2024年度"];
+const COMP_COLORS=["#0017C1","#FB5B01","#259D63","#00A3BF"];const COMP_BG=["rgba(0,23,193,.10)","rgba(251,91,1,.10)","rgba(37,157,99,.10)","rgba(0,163,191,.10)"];const COMP_MARKERS=["circle","rect","triangle","star"];
+const SUGGEST_GROUPS=[{label:"旧帝大",names:["東京大学","京都大学","大阪大学","東北大学","北海道大学","九州大学","名古屋大学"]},{label:"主要私立",names:["早稲田大学","慶應義塾大学","立命館大学","同志社大学","明治大学"]},{label:"主要公立",names:["大阪公立大学","東京都立大学","横浜市立大学"]}];
+
+// Utils
+const isMoney=k=>/受入額|経費|収入/.test(k);
+const fmtVal=(v,k="")=>{if(v==null||isNaN(v))return"-";if(isMoney(k)){const o=v/100000;return o>=1?o.toFixed(1)+" 億円":(v/10).toFixed(0)+" 万円"}return v.toLocaleString("ja-JP")};
+const kpiL=(k,c)=>{let l=k.replaceAll("_"," ");if(c&&c!=="概要"&&l.startsWith(c+" "))l=l.substring(c.length+1);return l};
+const getThemeColors=()=>{const dark=document.documentElement.getAttribute('data-theme')==='dark';return{grid:dark?'#2A3040':'#F0F1F5',text:dark?'#8B92A0':'#6B7280',fill:dark?'rgba(107,147,255,.15)':'rgba(0,23,193,.06)',card:dark?'#1C2030':'#FFFFFF',textStrong:dark?'#EAEDF2':'#374151',line:dark?'#6B93FF':'#0017C1',fillTop:dark?'rgba(107,147,255,.20)':'rgba(0,23,193,.12)',fillBottom:dark?'rgba(107,147,255,.02)':'rgba(0,23,193,.01)'}};
+const yTick=k=>v=>{if(isMoney(k))return(v/100000).toFixed(0)+"億";if(v>=10000)return(v/10000).toFixed(0)+"万";return v.toLocaleString()};
+function calcChg(values,avail){if(!values||values.length<2)return null;let lat=null,li=-1;for(let i=values.length-1;i>=0;i--){if(avail&&!avail[i])continue;if(values[i]!=null){lat=values[i];li=i;break}}if(lat===null||li<=0)return null;let prev=null;for(let i=li-1;i>=0;i--){if(avail&&!avail[i])continue;if(values[i]!=null){prev=values[i];break}}if(prev===null||prev===0)return null;return((lat-prev)/Math.abs(prev))*100}
+function getDataNote(avail){if(!avail)return null;const a=avail.map((v,i)=>v?YL[i]:null).filter(Boolean);if(a.length>=5)return null;return`※ ${a.join("・")}の${a.length}年度分のみ`}
+function isSparse(avail){return avail?avail.filter(Boolean).length<=3:false}
+function nullify(values,avail){if(!avail||!values)return values;return values.map((v,i)=>avail[i]?v:null)}
+
+// API
+// Lucide SVG Icons (inline, no CDN dependency)
+const I=({d,size=20,...p})=>React.createElement('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',...p},
+    ...(Array.isArray(d)?d:[d]).map((path,i)=>React.createElement('path',{key:i,d:path})));
+const IC={
+    home:(p)=><I d={["m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z","M9 22V12h6v10"]} {...p}/>,
+    users:(p)=><I d={["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2","M9 7a4 4 0 1 0 0 0","M22 21v-2a4 4 0 0 0-3-3.87","M16 3.13a4 4 0 0 1 0 7.75"]} {...p}/>,
+    briefcase:(p)=><I d={["M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16","M2 10a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"]} {...p}/>,
+    flask:(p)=><I d={["M9 3h6","M10 9V3","M14 9V3","M7 21h10","M8.5 15 7 21","M15.5 15 17 21","M6 15h12"]} {...p}/>,
+    lightbulb:(p)=><I d={["M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5","M9 18h6","M10 22h4"]} {...p}/>,
+    shield:(p)=><I d={["M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"]} {...p}/>,
+    scroll:(p)=><I d={["M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4","M19 3H9v7"]} {...p}/>,
+    rocket:(p)=><I d={["M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z","m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z","M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0","M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"]} {...p}/>,
+    gift:(p)=><I d={["M20 12v10H4V12","M2 7h20v5H2z","M12 22V7","M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z","M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"]} {...p}/>,
+    trending:(p)=><I d={["M22 7 13.5 15.5 8.5 10.5 2 17","M16 7h6v6"]} {...p}/>,
+    building:(p)=><I d={["M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z","M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2","M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2","M10 6h4","M10 10h4","M10 14h4","M10 18h4"]} {...p}/>,
+    barChart:(p)=><I d={["M3 3v18h18","M18 17V9","M13 17V5","M8 17v-3"]} {...p}/>,
+    chevronsL:(p)=><I d={["m11 17-5-5 5-5","m18 17-5-5 5-5"]} {...p}/>,
+    chevronsR:(p)=><I d={["m6 17 5-5-5-5","m13 17 5-5-5-5"]} {...p}/>,
+    sun:(p)=><I d={["M12 12a4 4 0 1 0 0 0","M12 2v2","M12 20v2","m4.93 4.93 1.41 1.41","m17.66 17.66 1.41 1.41","M2 12h2","M20 12h2","m6.34 17.66-1.41 1.41","m19.07 4.93-1.41 1.41"]} {...p}/>,
+    moon:(p)=><I d={["M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"]} {...p}/>,
+    search:(p)=><I d={["M11 11a8 8 0 1 0 0 0","m21 21-4.3-4.3"]} {...p}/>,
+    menu:(p)=><I d={["M4 12h16","M4 6h16","M4 18h16"]} {...p}/>,
+    chevronR:(p)=><I d={["m9 18 6-6-6-6"]} {...p}/>,
+};
+
+// サイドバーのアイコンマッピング
+const SIDEBAR_ICONS={"概要":"home","共同研究":"users","受託研究":"briefcase","治験等":"flask","発明":"lightbulb","知的財産":"shield","特許権実施許諾":"scroll","ベンチャー":"rocket","寄附金・URA":"gift"};
+
+const api={
+    metadata:()=>fetch("/api/metadata").then(r=>r.json()),
+    national:(k,type,pref)=>{let u=`/api/national?kpis=${k.map(encodeURIComponent).join(",")}`;if(type)u+=`&type=${encodeURIComponent(type)}`;if(pref)u+=`&prefecture=${encodeURIComponent(pref)}`;return fetch(u).then(r=>r.json())},
+    byType:k=>fetch(`/api/by-type?kpis=${k.map(encodeURIComponent).join(",")}`).then(r=>r.json()),
+    ranking:(k,yi,l=10,type,pref)=>{let u=`/api/ranking?kpi=${encodeURIComponent(k)}&year_index=${yi}&limit=${l}`;if(type)u+=`&type=${encodeURIComponent(type)}`;if(pref)u+=`&prefecture=${encodeURIComponent(pref)}`;return fetch(u).then(r=>r.json())},
+    universities:p=>{const q=new URLSearchParams();Object.entries(p).forEach(([k,v])=>{if(v!=null&&v!=="")q.append(k,v)});return fetch(`/api/universities?${q}`).then(r=>r.json())},
+    university:c=>fetch(`/api/university/${encodeURIComponent(c)}`).then(r=>r.json()),
+    rankingContext:(k,c,yi=6,range=5)=>fetch(`/api/ranking-context?kpi=${encodeURIComponent(k)}&code=${encodeURIComponent(c)}&year_index=${yi}&range=${range}`).then(r=>r.json()),
+    universityRanks:(c,k,yi=6)=>fetch(`/api/university-ranks?code=${encodeURIComponent(c)}&kpis=${k.map(encodeURIComponent).join(",")}&year_index=${yi}`).then(r=>r.json()),
+    multiUni:(codes,kpis,yi=6)=>fetch(`/api/universities/multi?codes=${codes.join(",")}&kpis=${kpis.map(encodeURIComponent).join(",")}&year_index=${yi}`).then(r=>r.json()),
+};
+
+// P0-2: Export utilities
+function ExportBtn({instRef,filename="chart"}){
+    const dl=()=>{if(!instRef?.current)return;const url=instRef.current.toBase64Image("image/png",2);const a=document.createElement("a");a.href=url;a.download=filename+".png";a.click()};
+    return <button className="export-btn" onClick={e=>{e.stopPropagation();dl()}} title="PNG保存">📥</button>;
+}
+function downloadCSV(universities,kpi,category){
+    const h=["#","大学名","区分","都道府県",...YL].join(",");
+    const rows=universities.map((u,i)=>{const v=u.kpis?.[kpi]||[];return[i+1,`"${u.name}"`,u.type,u.prefecture,...YL.map((_,j)=>v[j]??"")].join(",")});
+    const csv="\uFEFF"+[h,...rows].join("\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download=`${category}_${kpiL(kpi)}.csv`;a.click();URL.revokeObjectURL(url);
+}
+
+// SmartSearch
+function SmartSearch({onSelect,onSetMyUni,placeholder="大学名を入力...",showMyUniBtn=false,showSuggestions=true}){
+    const[results,setResults]=useState([]);const[open,setOpen]=useState(false);const[query,setQuery]=useState("");const ref=useRef(null);const[sc,setSc]=useState({});
+    const search=useCallback(async q=>{if(!q.trim()){setResults([]);return}try{const d=await api.universities({search:q,limit:8});setResults(d.universities||[])}catch{setResults([])}}, []);
+    useEffect(()=>{if(!showSuggestions)return;const names=SUGGEST_GROUPS.flatMap(g=>g.names);Promise.all(names.map(n=>api.universities({search:n,limit:1}).then(d=>(d.universities||[])[0]).catch(()=>null))).then(unis=>{const c={};unis.forEach(u=>{if(u)c[u.name]=u});setSc(c)})},[showSuggestions]);
+    const sel=(u,asMyUni)=>{if(asMyUni&&onSetMyUni)onSetMyUni(u);else if(onSelect)onSelect(u);setOpen(false);setResults([]);setQuery("");if(ref.current)ref.current.value=""};
+    return(<div className="search-wrapper" style={{width:"100%"}}><input ref={ref} type="text" className="filter-input" style={{width:"100%"}} placeholder={placeholder} onChange={e=>{setQuery(e.target.value);setOpen(true);if(e.target.value)search(e.target.value);else setResults([])}} onFocus={()=>setOpen(true)} onBlur={()=>setTimeout(()=>setOpen(false),250)}/>
+        {open&&!query&&showSuggestions&&Object.keys(sc).length>0&&<div className="autocomplete-dropdown">{SUGGEST_GROUPS.map(g=>{const unis=g.names.map(n=>sc[n]).filter(Boolean);if(!unis.length)return null;return(<div key={g.label}><div className="ac-group-label">{g.label}</div>{unis.map(u=>(<div key={u.code} className="autocomplete-item" onMouseDown={e=>e.preventDefault()} onClick={()=>sel(u,false)}><div><div className="autocomplete-item-name">{u.name}</div><div className="autocomplete-item-meta">{u.type}/{u.prefecture}</div></div>{showMyUniBtn&&<button className="ac-btn primary" onClick={e=>{e.stopPropagation();sel(u,true)}}>★ マイ大学</button>}</div>))}</div>)})}</div>}
+        {open&&query&&results.length>0&&<div className="autocomplete-dropdown">{results.map(u=>(<div key={u.code} className="autocomplete-item" onMouseDown={e=>e.preventDefault()} onClick={()=>sel(u,false)}><div><div className="autocomplete-item-name">{u.name}</div><div className="autocomplete-item-meta">{u.type}/{u.prefecture}</div></div><div style={{display:"flex",gap:6}}>{onSelect&&<button className="ac-btn" onClick={e=>{e.stopPropagation();sel(u,false)}}>選択</button>}{showMyUniBtn&&onSetMyUni&&<button className="ac-btn primary" onClick={e=>{e.stopPropagation();sel(u,true)}}>★ マイ大学</button>}</div></div>))}</div>}
+    </div>);
+}
+
+// KPICard
+function KPICard({label,value,change,sparkData,kpi,selected,onClick,rank,dataNote,avail,big}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!sparkData||sparkData.length<2)return;if(inst.current)inst.current.destroy();
+        const sparse=isSparse(avail);const dv=avail?nullify(sparkData,avail):sparkData;const tc=getThemeColors();
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:sparse?"scatter":"line",
+            data:{labels:YL,datasets:[{data:sparse?dv.map((v,i)=>v!=null?{x:i,y:v}:null).filter(Boolean):dv,
+                borderColor:selected?tc.line:"#7096F8",backgroundColor:sparse?(selected?tc.line:"#7096F8"):tc.fill,
+                borderWidth:sparse?0:2,fill:!sparse,tension:0,spanGaps:false,pointRadius:sparse?5:3,pointBackgroundColor:selected?"#0017C1":"#7096F8",pointBorderColor:"transparent",showLine:!sparse}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:true,callbacks:{title:i=>{const idx=sparse?i[0].raw?.x:i[0].dataIndex;return YLL[idx]||""},label:i=>fmtVal(sparse?i.raw?.y:i.raw,kpi)}}},
+                scales:sparse?{x:{type:"linear",min:-.5,max:6.5,display:false},y:{display:false}}:{x:{display:false},y:{display:false}},animation:{duration:400}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[sparkData,selected,avail]);
+    const signal=change==null?"":change>=5?"signal-up":change<=-5?"signal-down":"signal-flat";
+    // P0-3: Enhanced trend arrow
+    const trendIcon=change==null?"":change>=10?"↑↑":change>=5?"↑":change>-5?"→":change>-10?"↓":"↓↓";
+    const cc=change>0?"positive":change<0?"negative":"neutral";
+    return(<div className={`kpi-card ${selected?"selected":""} ${signal}`} onClick={onClick}>
+        <div className="kpi-label">{label}</div>
+        <div className="kpi-value">{fmtVal(value,kpi)}</div>
+        {change!=null&&<span className={`kpi-change ${cc}`}><span className="trend-icon">{trendIcon}</span> {change>0?"+":""}{change.toFixed(1)}%</span>}
+        {rank&&<><span className="kpi-rank">全国 {rank.rank}位 / {rank.total}機関</span>
+            <div className="pbar">{[...Array(10)].map((_,i)=>{const pct=1-rank.rank/rank.total;const filled=i<Math.round(pct*10);const isTop=pct>=0.8;return<span key={i} className={`pbar-dot ${filled?"filled":""} ${filled&&isTop?"top":""}`}/>})}<span className="pbar-label">上位{Math.round((rank.rank/rank.total)*100)}%</span></div></>}
+        {dataNote&&<span className="kpi-note">{dataNote}</span>}
+        <div className="kpi-chart"><canvas ref={cRef}></canvas></div>
+    </div>);
+}
+
+// ExpandedLineChart
+function ExpandedLineChart({data,kpi,avail,filterLabel}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!data||!kpi)return;if(inst.current)inst.current.destroy();
+        const raw=data[kpi]||[];const vals=avail?nullify(raw,avail):raw;if(!vals.length)return;const tc=getThemeColors();
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets:[{label:kpiL(kpi),data:vals,borderColor:tc.line,backgroundColor:tc.fill,borderWidth:3,fill:true,tension:0,spanGaps:false,pointRadius:6,pointHoverRadius:8,pointBackgroundColor:tc.line,pointBorderColor:tc.card,pointBorderWidth:3}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true,align:"top",anchor:"end",color:tc.text,font:{size:13,weight:700,family:"'Outfit'"},formatter:v=>v!=null?fmtVal(v,kpi):""},tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>fmtVal(i.raw,kpi)}}},
+            scales:{y:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:12},callback:yTick(kpi)}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:13,weight:600}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[data,kpi,avail]);
+    const note=avail?getDataNote(avail):null;
+    return(<div style={{position:"relative"}}>{note&&<div className="chart-note">{note}</div>}<div style={{height:260}}><canvas ref={cRef}></canvas></div></div>);
+}
+
+// IndexChart
+function IndexChart({uniData,natData,kpi,uniName,title,subtitle,avail}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!uniData||!natData||!kpi)return;if(inst.current)inst.current.destroy();
+        const uVals=uniData[kpi]||[];const nVals=natData[kpi]||[];if(!uVals.length||!nVals.length)return;
+        const a=avail?.[kpi];const uN=a?nullify(uVals,a):uVals;const nN=a?nullify(nVals,a):nVals;
+        let baseU=null,baseN=null;for(let i=0;i<uN.length;i++){if(uN[i]!=null&&uN[i]>0){baseU=uN[i];break}}for(let i=0;i<nN.length;i++){if(nN[i]!=null&&nN[i]>0){baseN=nN[i];break}}
+        if(!baseU||!baseN)return;const uIdx=uN.map(v=>v!=null?(v/baseU)*100:null);const nIdx=nN.map(v=>v!=null?(v/baseN)*100:null);const tc=getThemeColors();
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets:[
+            {label:uniName,data:uIdx,borderColor:"#0017C1",backgroundColor:tc.fill,borderWidth:2.5,fill:true,tension:0,spanGaps:false,pointRadius:5,pointBackgroundColor:"#0017C1",pointBorderColor:tc.card,pointBorderWidth:2},
+            {label:"全国平均",data:nIdx,borderColor:COMP_COLORS[1],backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:4,pointStyle:"triangle",pointBackgroundColor:COMP_COLORS[1],pointBorderColor:"transparent",fill:false}
+        ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:13,family:"'Noto Sans JP'"},usePointStyle:true,padding:16,color:tc.text}},datalabels:{display:false},tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>{const raw=i.datasetIndex===0?uN[i.dataIndex]:nN[i.dataIndex];return`${i.dataset.label}: ${i.raw!=null?i.raw.toFixed(1)+"%":"-"} (${fmtVal(raw,kpi)})`}}}},
+            scales:{y:{border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:12},callback:v=>v+"%"},title:{display:true,text:"基準年=100%",font:{size:11},color:tc.text}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniData,natData,kpi]);
+    const note=avail?getDataNote(avail?.[kpi]):null;
+    return(<div className="chart-panel"><div className="chart-title">{title}</div><div className="chart-subtitle">{subtitle}</div>{note&&<div className="chart-note">{note}</div>}<div className="chart-canvas-wrapper trend"><canvas ref={cRef}></canvas></div></div>);
+}
+
+// StackedBar
+function StackedBar({byTypeData,kpi,title,subtitle}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!byTypeData||!kpi)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
+        const types=["国立","公立","私立"];const colors=["#0017C1","#3460FB","#7096F8"];
+        const datasets=types.map((t,ti)=>({label:t,data:YL.map((_,yi)=>(byTypeData[t]?.[kpi]||[])[yi]||0),backgroundColor:colors[ti]}));
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"bar",data:{labels:YL,datasets},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:12},usePointStyle:true,pointStyle:"rect",padding:14,color:tc.text}},datalabels:{display:false}},scales:{x:{stacked:true,border:{display:false},grid:{color:tc.grid},ticks:{display:false}},y:{stacked:true,border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[byTypeData,kpi]);
+    return(<div className="chart-panel"><div className="chart-title">{title}</div><div className="chart-subtitle">{subtitle}</div><div className="chart-canvas-wrapper small"><canvas ref={cRef}></canvas></div></div>);
+}
+
+// BulletGraph
+function BulletGraph({contextData,kpi,title,subtitle}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!contextData||!contextData.length)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
+        const labels=contextData.map(d=>d.name.length>12?d.name.substring(0,12)+"…":d.name);const vals=contextData.map(d=>d.value);const colors=contextData.map(d=>d.is_target?"#0017C1":"#C5D7FB");
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"bar",data:{labels,datasets:[{data:vals,backgroundColor:colors,borderRadius:4,barThickness:20}]},
+            options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{title:i=>{const d=contextData[i[0].dataIndex];return`${d.rank}位 ${d.name}`},label:i=>fmtVal(i.raw,kpi)}}},
+            scales:{x:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:11},callback:yTick(kpi)}},y:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[contextData,kpi]);
+    return(<div className="chart-panel"><div className="chart-title">{title}</div><div className="chart-subtitle">{subtitle}</div><div className="chart-canvas-wrapper small"><canvas ref={cRef}></canvas></div></div>);
+}
+
+// CompactTable
+function CompactTable({universities,currentKpi,category,page,onPageChange,total}){
+    const[expanded,setExpanded]=useState(false);const[search,setSearch]=useState("");
+    const filtered=search?universities.filter(u=>u.name.includes(search)):universities;const shown=expanded?filtered:filtered.slice(0,8);
+    return(<div className="table-panel"><div className="table-toolbar"><div><div className="table-title">大学別データ — {kpiL(currentKpi,category)}</div><div className="table-count">{total.toLocaleString()} 機関</div></div>
+        <input className="table-search" placeholder="テーブル内検索..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
+        {shown.length===0?<div className="empty-state">該当データなし</div>:<><div className="table-scroll"><table><thead><tr><th style={{width:48}}>#</th><th>大学名</th><th>区分</th><th>都道府県</th>{YL.map((y,i)=><th key={i} className="numeric">{y}</th>)}</tr></thead>
+        <tbody>{shown.map((u,idx)=>{const vals=u.kpis?.[currentKpi]||[];return(<tr key={u.code||idx}><td style={{color:"var(--text-3)",fontWeight:600}}>{page*50+idx+1}</td><td style={{fontWeight:600}}>{u.name}</td><td>{u.type}</td><td>{u.prefecture}</td>{YL.map((_,i)=><td key={i} className="numeric">{fmtVal(vals[i]??null,currentKpi)}</td>)}</tr>)})}</tbody></table></div>
+        {!expanded&&filtered.length>8&&<div style={{textAlign:"center",padding:"14px 0"}}><button className="pagination-btn" onClick={()=>setExpanded(true)} style={{padding:"8px 28px",borderRadius:"var(--radius-md)"}}>さらに表示 ▼</button></div>}
+        {expanded&&<div className="pagination"><button className="pagination-btn" disabled={page===0} onClick={()=>onPageChange(page-1)}>前へ</button><span className="pagination-info">{page*50+1}–{Math.min((page+1)*50,total)} / {total.toLocaleString()}</span><button className="pagination-btn" disabled={(page+1)*50>=total} onClick={()=>onPageChange(page+1)}>次へ</button></div>}</>}</div>);
+}
+
+function Footer(){return(<footer className="dashboard-footer">データソース：文部科学省「<a href="https://www.mext.go.jp/a_menu/shinkou/sangaku/sangakub.htm" target="_blank" rel="noopener">産学連携等実施状況調査</a>」（H30〜R6 / 2018〜2024年度）<br/>1,102機関（大学827・短大212・高専59・研究機構4）/ 58指標 / URA・寄附金等はH30・R4の2年度分のみ</footer>)}
+
+// Sidebar with icons
+function SidebarItem({icon,label,active,onClick,badge,tooltip}){
+    return(<div className={`sidebar-item ${active?"active":""}`} onClick={onClick} data-tooltip={tooltip||label}>
+        <span className="sidebar-icon">{icon}</span>
+        <span className="sidebar-label">{label}</span>
+        {badge&&<span className="sidebar-badge sidebar-label">{badge}</span>}
+    </div>);
+}
+
+function Sidebar({currentPage,onChange,myUniversity,isOpen,onClose,collapsed,onToggleCollapse}){
+    const cl=collapsed?"collapsed":"";
+    return(<><div className={`sidebar ${isOpen?"open":""} ${cl}`}>
+        <div className="sidebar-header"><div className="sidebar-title">産学連携</div><div className="sidebar-subtitle">文部科学省 H30–R6</div></div>
+        <nav className="sidebar-nav">
+        <SidebarItem icon={<IC.building size={18}/>} label="マイ大学" active={currentPage.type==="my-university"} onClick={()=>{onChange({type:"my-university",id:null});onClose()}} badge={myUniversity?myUniversity.name.substring(0,4):null} tooltip="マイ大学"/>
+        <SidebarItem icon={<IC.barChart size={18}/>} label="大学比較" active={currentPage.type==="comparison"} onClick={()=>{onChange({type:"comparison",id:null});onClose()}} tooltip="大学比較"/>
+        <div className="sidebar-sep"></div>
+        {SIDEBAR_ITEMS.map(item=>{const iconKey=SIDEBAR_ICONS[item]||"home";const IconComp=IC[iconKey]||IC.home;return<SidebarItem key={item} icon={<IconComp size={18}/>} label={item} active={currentPage.type==="category"&&currentPage.id===item} onClick={()=>{onChange({type:"category",id:item});onClose()}} tooltip={item}/>})}
+        <div className="sidebar-sep"></div>
+        <SidebarItem icon={<IC.trending size={18}/>} label="知財パイプライン" active={currentPage.type==="ip-funnel"} onClick={()=>{onChange({type:"ip-funnel",id:null});onClose()}} tooltip="知財パイプライン"/>
+        </nav>
+        <button className="sidebar-collapse-btn" onClick={onToggleCollapse}>{collapsed?<IC.chevronsR size={18}/>:<IC.chevronsL size={18}/>}</button>
+        <div className="sidebar-footer">大学827・短大212・高専59<br/>全1,102機関 / 58指標</div></div>
+        <div className={`sidebar-overlay ${isOpen?"open":""}`} onClick={onClose}></div></>);
+}
+
+// Phase 6: Landing Page
+function LandingPage({onEnter,theme,onToggleTheme}){
+    return(<div className="landing" style={{height:"100vh",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+        <div className="landing-nav"><div className="landing-logo" style={{fontSize:14}}>産学連携ファクトブック</div><button className="theme-toggle" onClick={onToggleTheme}>{theme==="dark"?"☀️":"🌙"}</button></div>
+        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 40px",gap:60,maxWidth:1100,margin:"0 auto",width:"100%"}}>
+            {/* 左: テキスト */}
+            <div style={{flex:"1 1 50%"}} className="anim-in">
+                <div style={{fontSize:11,color:"var(--text-3)",fontWeight:700,letterSpacing:".08em",marginBottom:16,textTransform:"uppercase"}}>文部科学省 産学連携等実施状況調査</div>
+                <h1 className="landing-headline" style={{fontSize:30,marginBottom:14,lineHeight:1.3}}>産学連携ダッシュボード</h1>
+                <p style={{fontSize:14,color:"var(--text-2)",lineHeight:1.8,marginBottom:24,maxWidth:380}}>全国827大学・212短大・59高専の産学連携データ（H30〜R6 / 7年度分・58指標）を閲覧・比較できます。</p>
+                <button className="landing-cta" onClick={onEnter} style={{padding:"12px 28px",fontSize:15}}>ダッシュボードを開く</button>
+                <div style={{marginTop:24,fontSize:11,color:"var(--text-3)"}}>出典：文部科学省「産学連携等実施状況調査」</div>
+            </div>
+            {/* 右: 機能カード */}
+            <div style={{flex:"1 1 40%",display:"flex",flexDirection:"column",gap:12}} className="anim-in anim-delay-2">
+                <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:16,padding:"24px 28px",borderLeft:"4px solid var(--blue-900)"}}>
+                    <div style={{fontSize:18,fontWeight:800,fontFamily:"var(--font-display)",marginBottom:6}}>★ マイ大学</div>
+                    <div style={{fontSize:13,color:"var(--text-2)",lineHeight:1.7}}>自分の大学を設定し、全国順位・パーセンタイル・強み弱みをエグゼクティブサマリーで即把握。全国平均との変化率比較チャート付き。</div>
+                </div>
+                <div style={{display:"flex",gap:12}}>
+                    <div style={{flex:1,background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:"16px 18px"}}>
+                        <div style={{fontSize:14,fontWeight:700,fontFamily:"var(--font-display)",marginBottom:4}}>⇔ 大学比較</div>
+                        <div style={{fontSize:12,color:"var(--text-2)",lineHeight:1.6}}>最大4校をレーダーチャートで比較</div>
+                    </div>
+                    <div style={{flex:1,background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:"16px 18px"}}>
+                        <div style={{fontSize:14,fontWeight:700,fontFamily:"var(--font-display)",marginBottom:4}}>📊 知財分析</div>
+                        <div style={{fontSize:12,color:"var(--text-2)",lineHeight:1.6}}>発明→出願→保有→許諾→収入のファネル</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>);
+}
+
+// CategoryPage
+function CategoryPage({category,metadata,onSetMyUni}){
+    const[selIdx,setSelIdx]=useState(0);const[natData,setNatData]=useState(null);const[btData,setBtData]=useState(null);
+    const[rkData,setRkData]=useState([]);const[unis,setUnis]=useState([]);const[totalUnis,setTotalUnis]=useState(0);
+    const[filters,setFilters]=useState({type:"",prefecture:""});const[page,setPage]=useState(0);const[loading,setLoading]=useState(true);
+    const kpis=CATEGORY_KPIS[category]||[];const selKpi=kpis[selIdx]||kpis[0];
+    const isFiltered=!!(filters.type||filters.prefecture);const filterLabel=[filters.type,filters.prefecture].filter(Boolean).join(" / ")||"全大学";
+    const avail=metadata?.data_availability;
+    useEffect(()=>{setSelIdx(0);setPage(0)},[category]);
+    useEffect(()=>{if(!metadata)return;setLoading(true);api.national(kpis,filters.type||undefined,filters.prefecture||undefined).then(r=>setNatData(r.data||{})).catch(()=>{}).finally(()=>setLoading(false))},[category,metadata,filters]);
+    useEffect(()=>{if(!metadata||!selKpi)return;const btP=filters.type?Promise.resolve(null):api.byType([selKpi]).then(r=>r.data||{}).catch(()=>null);const rkP=api.ranking(selKpi,metadata.years.length-1,10,filters.type||undefined,filters.prefecture||undefined).then(r=>r.ranking||[]).catch(()=>[]);Promise.all([btP,rkP]).then(([bt,rk])=>{setBtData(bt);setRkData(rk)})},[selKpi,metadata,filters]);
+    useEffect(()=>{if(!metadata||!selKpi)return;api.universities({type:filters.type||undefined,prefecture:filters.prefecture||undefined,kpi:selKpi,sort:"desc",limit:50,offset:page*50}).then(d=>{setUnis(d.universities||[]);setTotalUnis(d.total_count||0)}).catch(()=>{})},[selKpi,filters,page,metadata]);
+    const cards=kpis.map((k,i)=>{const v=natData?.[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,category),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,dataNote:a?getDataNote(a):null,avail:a}});
+    if(loading&&!natData)return<div className="loading-state"><div className="spinner"></div></div>;
+    return(<div>
+        <div className="filter-bar">
+            <div className="filter-group"><label className="filter-label">設置区分</label><select className="filter-select" value={filters.type||""} onChange={e=>{setFilters({...filters,type:e.target.value});setPage(0)}}><option value="">すべて</option>{["国立","公立","私立"].map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+            <div className="filter-group"><label className="filter-label">都道府県</label><select className="filter-select" value={filters.prefecture||""} onChange={e=>{setFilters({...filters,prefecture:e.target.value});setPage(0)}}><option value="">すべて</option>{(metadata?.prefectures||[]).map(p=><option key={p} value={p}>{p}</option>)}</select></div>
+            <div className="filter-group search-wrapper"><label className="filter-label">大学検索</label><SmartSearch showMyUniBtn={true} onSetMyUni={onSetMyUni}/></div>
+        </div>
+        {isFiltered&&<div className="context-bar">表示中: {filterLabel}<span className="ctx-clear" onClick={()=>{setFilters({type:"",prefecture:""});setPage(0)}}>解除</span></div>}
+        <div className="kpi-grid">{cards.map((c,i)=><KPICard key={c.kpi} {...c} selected={i===selIdx} onClick={()=>{setSelIdx(i);setPage(0)}} big={i===0}/>)}</div>
+        <div className="detail-panel anim-in">
+            <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:20}}>
+                <span className="detail-title">{kpiL(selKpi,category)}</span>
+                <span className="detail-meta">{filterLabel} — 詳細</span>
+            </div>
+            <ExpandedLineChart data={natData} kpi={selKpi} avail={avail?.[selKpi]} filterLabel={filterLabel}/>
+            <div className="charts-row" style={{marginTop:20,marginBottom:0}}>
+                {btData?<StackedBar byTypeData={btData} kpi={selKpi} title="設置区分別 構成比" subtitle={filterLabel}/>:<div className="chart-panel"><div className="empty-state">設置区分フィルター適用中</div></div>}
+                {rkData.length>0?<BulletGraph contextData={rkData} kpi={selKpi} title="大学ランキング TOP 10" subtitle={`R6 / ${filterLabel}`}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
+            </div>
+        </div>
+        <CompactTable universities={unis} currentKpi={selKpi} category={category} page={page} onPageChange={setPage} total={totalUnis}/>
+    </div>);
+}
+
+// P0-1: Executive Summary
+function ExecutiveSummary({myUniversity,metadata}){
+    const[uniData,setUniData]=useState(null);const[allRanks,setAllRanks]=useState(null);const[loading,setLoading]=useState(true);
+    const primaryKpis=SIDEBAR_ITEMS.filter(s=>s!=="概要").map(s=>(CATEGORY_KPIS[s]||[])[0]).filter(Boolean);
+
+    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);
+        Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,primaryKpis,metadata.years.length-1)])
+        .then(([u,r])=>{setUniData(u);setAllRanks(r.ranks||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,metadata]);
+
+    if(loading)return<div className="loading-state"><div className="spinner"></div></div>;
+    const uniKpis=uniData?.kpis||{};
+    // Determine strengths and cautions
+    const items=SIDEBAR_ITEMS.filter(s=>s!=="概要").map(cat=>{const kpi=(CATEGORY_KPIS[cat]||[])[0];if(!kpi)return null;const vals=uniKpis[kpi]||[];const avail=metadata?.data_availability?.[kpi];const dv=avail?nullify(vals,avail):vals;const latest=dv.reduce((l,x)=>x!=null?x:l,null);const change=calcChg(vals,avail);const rank=allRanks?.[kpi];const pct=rank?(1-rank.rank/rank.total):0;return{cat,kpi,latest,change,rank,pct}}).filter(Boolean);
+    const strengths=items.filter(i=>i.pct>=0.8).sort((a,b)=>b.pct-a.pct);
+    const cautions=items.filter(i=>i.change!=null&&i.change<-5).sort((a,b)=>a.change-b.change);
+
+    return(<div>
+        {/* Insight text */}
+        <div className="exec-insight anim-in">
+            {strengths.length>0&&<span>💪 <strong>強み:</strong> {strengths.map(s=>`${s.cat}（上位${Math.round((1-s.pct)*100)}%）`).join("、")}。</span>}
+            {cautions.length>0&&<span> ⚠️ <strong>要注意:</strong> {cautions.map(c=>`${c.cat}（前年比${c.change.toFixed(1)}%）`).join("、")}。</span>}
+            {strengths.length===0&&cautions.length===0&&<span>各カテゴリのパフォーマンスを以下に表示しています。</span>}
+        </div>
+        {/* Score cards */}
+        <div className="exec-grid">{items.map((item,idx)=>{const cls=item.pct>=0.8?"strength":item.change!=null&&item.change<-5?"caution":"neutral";
+            const trendIcon=item.change==null?"":item.change>=10?"↑↑":item.change>=5?"↑":item.change>-5?"→":item.change>-10?"↓":"↓↓";
+            const cc=item.change>0?"positive":item.change<0?"negative":"neutral";
+            return(<div key={item.cat} className={`exec-card ${cls} anim-in`} style={{animationDelay:`${idx*0.05}s`}}>
+                <div className="exec-cat">{item.cat}</div>
+                <div className="exec-val">{fmtVal(item.latest,item.kpi)}</div>
+                {item.change!=null&&<span className={`kpi-change ${cc}`} style={{marginBottom:6}}><span className="trend-icon">{trendIcon}</span> {item.change>0?"+":""}{item.change.toFixed(1)}%</span>}
+                {item.rank&&<div className="exec-rank">{item.rank.rank}位 / {item.rank.total}機関</div>}
+                {item.rank&&<div className="pbar" style={{marginTop:6}}>{[...Array(10)].map((_,i)=>{const filled=i<Math.round(item.pct*10);return<span key={i} className={`pbar-dot ${filled?"filled":""} ${filled&&item.pct>=0.8?"top":""}`}/>})}<span className="pbar-label">上位{Math.round((1-item.pct)*100+Number.EPSILON)}%</span></div>}
+            </div>)})}</div>
+    </div>);
+}
+
+// MyUniversityPage
+function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
+    const[cat,setCat]=useState("サマリー");const[selIdx,setSelIdx]=useState(0);
+    const[uniData,setUniData]=useState(null);const[natData,setNatData]=useState(null);const[ranks,setRanks]=useState(null);const[ctx,setCtx]=useState(null);const[loading,setLoading]=useState(true);
+    const kpis=CATEGORY_KPIS[cat]||[];const selKpi=kpis[selIdx]||kpis[0];const avail=metadata?.data_availability;
+    useEffect(()=>{setSelIdx(0)},[cat]);
+    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);const k=CATEGORY_KPIS[cat]||[];
+        Promise.all([api.university(myUniversity.code),api.national(k),api.universityRanks(myUniversity.code,k,metadata.years.length-1)])
+        .then(([u,n,r])=>{setUniData(u);setNatData(n.data||{});setRanks(r.ranks||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,cat,metadata]);
+    useEffect(()=>{if(!myUniversity||!metadata||!selKpi)return;api.rankingContext(selKpi,myUniversity.code,metadata.years.length-1,5).then(setCtx).catch(()=>setCtx(null))},[selKpi,myUniversity,metadata]);
+    if(!myUniversity)return(<div className="setup-box"><h2>マイ大学を設定</h2><p>大学を検索して設定すると、専用ダッシュボードが利用できます。</p><SmartSearch onSetMyUni={onSetMyUni} showMyUniBtn={true} placeholder="大学名で検索..." showSuggestions={true}/></div>);
+    const uniKpis=uniData?.kpis||{};
+    const cards=kpis.map((k,i)=>{const v=uniKpis[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,cat),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,rank:ranks?.[k]||null,dataNote:a?getDataNote(a):null,avail:a}});
+    return(<div>
+        <div className="uni-banner anim-in"><div style={{display:"flex",alignItems:"baseline"}}><div className="uni-banner-name">{myUniversity.name}</div><div className="uni-banner-meta">{myUniversity.type} / {myUniversity.prefecture}</div></div><button className="btn-sm danger" onClick={onClear}>クリア</button></div>
+        <div className="category-tabs"><div className={`cat-tab ${cat==="サマリー"?"active":""}`} onClick={()=>setCat("サマリー")} style={cat==="サマリー"?{background:"var(--blue-900)",color:"#fff"}:{}}>📊 サマリー</div>{SIDEBAR_ITEMS.map(s=><div key={s} className={`cat-tab ${cat===s?"active":""}`} onClick={()=>setCat(s)}>{s}</div>)}</div>
+        {cat==="サマリー"?<ExecutiveSummary myUniversity={myUniversity} metadata={metadata}/>:
+        loading?<div className="loading-state"><div className="spinner"></div></div>:<>
+            <div className="kpi-grid">{cards.map((c,i)=><KPICard key={c.kpi} {...c} selected={i===selIdx} onClick={()=>setSelIdx(i)}/>)}</div>
+            <div className="detail-panel anim-in">
+                <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:20}}>
+                    <span className="detail-title">{kpiL(selKpi,cat)}</span>
+                    <span className="detail-meta">詳細分析</span>
+                </div>
+                <div className="charts-row">
+                    <IndexChart uniData={uniKpis} natData={natData} kpi={selKpi} uniName={myUniversity.name} title="変化率推移" subtitle={`${myUniversity.name} vs 全国（基準年=100%）`} avail={avail}/>
+                    {ctx&&ctx.context?<BulletGraph contextData={ctx.context} kpi={selKpi} title="全国順位 前後±5" subtitle={`${ctx.target?.rank}位/${ctx.total_ranked}機関`}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
+                </div>
+            </div>
+        </>}
+    </div>);
+}
+
+// P1-4: 知財パイプライン
+const IP_FUNNEL=[{label:"発明届出",kpi:"発明届出件数"},{label:"特許出願",kpi:"特許出願_国内"},{label:"特許保有",kpi:"特許保有_国内"},{label:"許諾中",kpi:"特許保有_国内_実施許諾中"},{label:"許諾権利数",kpi:"実施許諾_国内_権利数"},{label:"許諾収入",kpi:"実施許諾収入_国内"}];
+
+function IPFunnelPage({myUniversity,metadata}){
+    const[uniData,setUniData]=useState(null);const[natData,setNatData]=useState(null);const[loading,setLoading]=useState(true);
+    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);
+        const kpis=IP_FUNNEL.map(f=>f.kpi);
+        Promise.all([api.university(myUniversity.code),api.national(kpis)])
+        .then(([u,n])=>{setUniData(u);setNatData(n.data||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,metadata]);
+
+    if(!myUniversity)return<div className="empty-state">マイ大学を設定すると知財パイプラインが表示されます</div>;
+    if(loading)return<div className="loading-state"><div className="spinner"></div></div>;
+    const uk=uniData?.kpis||{};const yi=6;
+    const items=IP_FUNNEL.map((f,i)=>{const v=(uk[f.kpi]||[])[yi];const nv=(natData[f.kpi]||[])[yi];return{...f,value:v,natValue:nv}});
+    const maxVal=Math.max(...items.map(i=>i.value||0),1);
+    // コンバージョン率
+    const convs=items.slice(1).map((item,i)=>{const prev=items[i].value;return prev&&item.value!=null?((item.value/prev)*100).toFixed(1)+"%":"-"});
+
+    return(<div>
+        <div className="uni-banner anim-in"><div style={{display:"flex",alignItems:"baseline"}}><div className="uni-banner-name">{myUniversity.name}</div><div className="uni-banner-meta">{myUniversity.type} / {myUniversity.prefecture}</div></div></div>
+        <div className="detail-panel anim-in">
+            <div className="detail-title" style={{marginBottom:24}}>知財パイプライン（R6 最新年度）</div>
+            <div style={{marginBottom:8,fontSize:12,color:"var(--text-3)"}}>※ 保有は累積ストック、他はフロー。段階間の比率は参考値です。</div>
+            {items.map((item,i)=>{const pct=item.value!=null?Math.max((item.value/maxVal)*100,2):0;
+                const colors=["#0017C1","#3460FB","#7096F8","#00A3BF","#259D63","#FB5B01"];
+                return(<div key={i} className="funnel-bar anim-in" style={{animationDelay:`${i*0.08}s`}}>
+                    <div className="funnel-label">{item.label}</div>
+                    <div className="funnel-track"><div className="funnel-fill" style={{width:`${pct}%`,background:colors[i]}}></div><div className="funnel-value">{isMoney(item.kpi)?fmtVal(item.value,item.kpi):item.value!=null?item.value.toLocaleString():"-"}</div></div>
+                    <div className="funnel-conv">{i>0?convs[i-1]:""}</div>
+                </div>)})}
+        </div>
+        {/* 7年推移 */}
+        <div className="chart-panel full anim-in"><div className="chart-title">知財パイプライン 7年推移</div><div className="chart-subtitle">{myUniversity.name}</div>
+            <IPFunnelTrend uniKpis={uk}/></div>
+        {/* ピア比較 */}
+        <div className="table-panel anim-in"><div className="table-toolbar"><div className="table-title">コンバージョン率 — {myUniversity.name} vs 全国平均</div></div>
+            <table><thead><tr><th>段階</th><th className="numeric">{myUniversity.name}</th><th className="numeric">全国平均</th></tr></thead>
+            <tbody>{items.slice(1).map((item,i)=>{const uConv=items[i].value&&item.value!=null?((item.value/items[i].value)*100).toFixed(1)+"%":"-";const nPrev=(natData[items[i].kpi]||[])[yi];const nCurr=(natData[item.kpi]||[])[yi];const nConv=nPrev&&nCurr?((nCurr/nPrev)*100).toFixed(1)+"%":"-";
+                return<tr key={i}><td style={{fontWeight:600}}>{items[i].label}→{item.label}</td><td className="numeric">{uConv}</td><td className="numeric">{nConv}</td></tr>})}</tbody></table></div>
+    </div>);
+}
+
+function IPFunnelTrend({uniKpis}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
+        const colors=["#0017C1","#3460FB","#7096F8","#00A3BF","#259D63","#FB5B01"];
+        const datasets=IP_FUNNEL.filter(f=>!isMoney(f.kpi)).map((f,i)=>({label:f.label,data:uniKpis[f.kpi]||[],borderColor:colors[i],backgroundColor:"transparent",borderWidth:2,tension:0,pointRadius:3,pointBackgroundColor:colors[i]}));
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:12},usePointStyle:true,padding:12,color:tc.text}},datalabels:{display:false}},scales:{y:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:11}}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniKpis]);
+    return(<div style={{height:260}}><canvas ref={cRef}></canvas></div>);
+}
+
+// P2-4: Command Palette
+function CommandPalette({open,onClose,onNavigate,onSetMyUni,metadata}){
+    const[query,setQuery]=useState("");const[results,setResults]=useState([]);const inputRef=useRef(null);
+    useEffect(()=>{if(open&&inputRef.current){inputRef.current.focus();setQuery("");setResults([])}}, [open]);
+    useEffect(()=>{if(!open)return;const handler=e=>{if(e.key==="Escape")onClose()};document.addEventListener("keydown",handler);return()=>document.removeEventListener("keydown",handler)},[open,onClose]);
+
+    const search=async q=>{setQuery(q);if(!q.trim()){setResults([]);return}
+        const cats=SIDEBAR_ITEMS.filter(s=>s.includes(q)).map(s=>({type:"nav",label:s,meta:"カテゴリ",action:()=>{onNavigate({type:"category",id:s});onClose()}}));
+        const specials=[{match:"マイ大学",type:"nav",label:"★ マイ大学",meta:"マイ大学ページ",action:()=>{onNavigate({type:"my-university",id:null});onClose()}},{match:"比較",type:"nav",label:"⇔ 大学比較",meta:"比較ページ",action:()=>{onNavigate({type:"comparison",id:null});onClose()}},{match:"知財",type:"nav",label:"📊 知財パイプライン",meta:"知財分析",action:()=>{onNavigate({type:"ip-funnel",id:null});onClose()}}].filter(s=>s.match.includes(q));
+        let unis=[];try{const d=await api.universities({search:q,limit:5});unis=(d.universities||[]).map(u=>({type:"uni",label:u.name,meta:`${u.type}/${u.prefecture}`,action:()=>{onSetMyUni(u);onNavigate({type:"my-university",id:null});onClose()}}))}catch{}
+        setResults([...cats,...specials,...unis]);
+    };
+
+    if(!open)return null;
+    return(<div className="cmd-overlay" onClick={onClose}><div className="cmd-palette" onClick={e=>e.stopPropagation()}>
+        <input ref={inputRef} className="cmd-input" placeholder="大学名、カテゴリ、機能を検索..." value={query} onChange={e=>search(e.target.value)}/>
+        <div className="cmd-results">{results.length===0&&query?<div style={{padding:16,color:"var(--text-3)",textAlign:"center"}}>結果なし</div>:
+            results.map((r,i)=><div key={i} className="cmd-item" onClick={r.action}><div><div className="cmd-item-label">{r.label}</div><div className="cmd-item-meta">{r.meta}</div></div></div>)}
+        {!query&&<div style={{padding:16,color:"var(--text-3)",fontSize:13,textAlign:"center"}}>大学名・カテゴリ名を入力して検索</div>}
+        </div></div></div>);
+}
+
+// ComparisonPage
+function ComparisonPage({myUniversity,metadata}){
+    const[slots,setSlots]=useState(()=>myUniversity?[myUniversity]:[]);const[cat,setCat]=useState("概要");const[compData,setCompData]=useState(null);const[searchSlot,setSearchSlot]=useState(null);
+    const kpis=CATEGORY_KPIS[cat]||[];
+    useEffect(()=>{if(myUniversity&&(slots.length===0||slots[0]?.code!==myUniversity.code)){setSlots(prev=>{const rest=prev.filter(s=>s.code!==myUniversity.code);return[myUniversity,...rest].slice(0,4)})}},[myUniversity]);
+    useEffect(()=>{if(slots.length<1||!metadata){setCompData(null);return}api.multiUni(slots.map(s=>s.code),kpis,metadata.years.length-1).then(r=>setCompData(r.universities||[])).catch(()=>setCompData(null))},[slots,cat,metadata]);
+    const addUni=u=>{if(slots.length>=4||slots.some(s=>s.code===u.code))return;setSlots([...slots,{code:u.code,name:u.name,type:u.type,prefecture:u.prefecture}]);setSearchSlot(null)};
+    const removeUni=i=>setSlots(slots.filter((_,j)=>j!==i));
+    return(<div>
+        <div className="compare-slots">{[0,1,2,3].map(i=>{const s=slots[i];return(<div key={i} className={`compare-slot ${s?"filled":""}`} style={s?{borderColor:COMP_COLORS[i]}:{}}>
+            {s?<><div style={{display:"flex",alignItems:"center"}}><span className="slot-color" style={{background:COMP_COLORS[i]}}></span><span className="slot-name">{s.name}</span></div><div className="slot-meta">{s.type}/{s.prefecture}</div>
+            {(i>0||!myUniversity||s.code!==myUniversity.code)&&<button className="slot-remove" onClick={()=>removeUni(i)}>✕</button>}</>
+            :searchSlot===i?<SmartSearch onSelect={addUni} placeholder="大学名..." showSuggestions={true}/>:<div className="slot-add" onClick={()=>setSearchSlot(i)}>+ 大学を追加</div>}</div>)})}</div>
+        <div className="category-tabs" style={{marginBottom:28}}>{SIDEBAR_ITEMS.map(s=><div key={s} className={`cat-tab ${cat===s?"active":""}`} onClick={()=>setCat(s)}>{s}</div>)}</div>
+        {!compData||compData.length<2?<div className="empty-state">{slots.length<2?"比較するには2つ以上の大学を選択してください":"読み込み中..."}</div>:<>
+            <RadarChart universities={compData} kpis={kpis} category={cat}/>
+            <div className="comp-kpi-grid">{kpis.map(kpi=>{const vals=compData.map(u=>{const a=u.kpis?.[kpi]||[];return a.length?a[a.length-1]||0:0});return(<div key={kpi} className="comp-kpi-panel"><div className="comp-kpi-title">{kpiL(kpi,cat)}</div><CompMiniBar unis={compData} vals={vals} kpi={kpi}/></div>)})}</div>
+            <CompTable universities={compData} kpis={kpis} category={cat}/>
+        </>}
+    </div>);
+}
+
+function CompMiniBar({unis,vals,kpi}){const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"bar",data:{labels:unis.map(u=>u.name.length>10?u.name.substring(0,10)+"…":u.name),datasets:[{data:vals,backgroundColor:unis.map((_,i)=>COMP_COLORS[i]),borderRadius:4,barThickness:18}]},
+            options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:10},callback:yTick(kpi)}},y:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[unis,vals,kpi]);
+    return(<div style={{height:Math.max(70,unis.length*30)}}><canvas ref={cRef}></canvas></div>);
+}
+
+function RadarChart({universities,kpis,category}){const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!universities||universities.length<2)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
+        const labels=kpis.map(k=>kpiL(k,category));
+        const datasets=universities.map((u,i)=>({label:u.name,data:kpis.map(k=>u.percentiles?.[k]??0),backgroundColor:COMP_BG[i],borderColor:COMP_COLORS[i],borderWidth:2.5,pointRadius:5,pointStyle:COMP_MARKERS[i],pointBackgroundColor:COMP_COLORS[i]}));
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"radar",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:20,font:{size:10},backdropColor:"transparent",color:tc.text},pointLabels:{font:{size:13,family:"'Noto Sans JP'"},color:tc.text},grid:{color:tc.grid}}},plugins:{legend:{position:"bottom",labels:{font:{size:13},usePointStyle:true,padding:16,color:tc.text}},datalabels:{display:false},tooltip:{callbacks:{label:item=>{const k=kpis[item.dataIndex];const uni=universities[item.datasetIndex];const a=uni.kpis?.[k];const latest=a?a[a.length-1]:null;return`${item.dataset.label}: ${item.raw.toFixed(1)}パーセンタイル (${fmtVal(latest,k)})`}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[universities,kpis,category]);
+    return(<div className="chart-panel full"><div className="chart-title">KPI比較レーダーチャート</div><div className="chart-subtitle">パーセンタイル順位 — 外側ほど上位</div><div className="chart-canvas-wrapper radar"><canvas ref={cRef}></canvas></div></div>);
+}
+
+function CompTable({universities,kpis,category}){
+    return(<div className="table-panel"><div className="table-toolbar"><div className="table-title">比較テーブル — {category}</div></div><table><thead><tr><th>KPI</th>{universities.map((u,i)=><th key={i}><span style={{display:"inline-block",width:12,height:12,borderRadius:3,background:COMP_COLORS[i],marginRight:6,verticalAlign:"middle"}}></span>{u.name.length>10?u.name.substring(0,10)+"…":u.name}</th>)}</tr></thead>
+        <tbody>{kpis.map(k=>{const vals=universities.map(u=>{const a=u.kpis?.[k]||[];return a.length?a[a.length-1]:null});const maxV=Math.max(...vals.filter(v=>v!=null));
+            return(<tr key={k}><td style={{fontWeight:600}}>{kpiL(k,category)}</td>{vals.map((v,i)=><td key={i} className={v!=null&&v===maxV&&maxV>0?"highlight numeric":"numeric"}>{fmtVal(v,k)}</td>)}</tr>)})}</tbody></table></div>);
+}
+
+// App
+function App(){
+    const[theme,setTheme]=useState(()=>localStorage.getItem("sangaku_theme")||"light");
+    const[currentPage,setCurrentPage]=useState({type:"landing",id:null});
+    const[metadata,setMetadata]=useState(null);const[loading,setLoading]=useState(true);const[error,setError]=useState(null);
+    const[sidebarOpen,setSidebarOpen]=useState(false);
+    const[sidebarCollapsed,setSidebarCollapsed]=useState(false);
+    const[cmdOpen,setCmdOpen]=useState(false);
+    const[myUniversity,setMyUniversity]=useState(()=>{try{const r=localStorage.getItem("sangaku_myUniversity");return r?JSON.parse(r):null}catch{return null}});
+
+    useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);localStorage.setItem("sangaku_theme",theme)},[theme]);
+    useEffect(()=>{if(myUniversity)localStorage.setItem("sangaku_myUniversity",JSON.stringify(myUniversity));else localStorage.removeItem("sangaku_myUniversity")},[myUniversity]);
+    // P2-4: Cmd+K shortcut
+    useEffect(()=>{const h=e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmdOpen(true)}};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h)},[]);
+    const toggleTheme=useCallback(()=>setTheme(t=>t==="dark"?"light":"dark"),[]);
+    const handleSetMyUni=useCallback(u=>{if(!u)return;setMyUniversity({code:u.code,name:u.name,type:u.type,prefecture:u.prefecture})},[]);
+    const handleClearMyUni=useCallback(()=>setMyUniversity(null),[]);
+
+    useEffect(()=>{api.metadata().then(setMetadata).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[]);
+
+    // Landing Page
+    if(currentPage.type==="landing")return<LandingPage onEnter={()=>setCurrentPage({type:"category",id:"概要"})} theme={theme} onToggleTheme={toggleTheme}/>;
+
+    if(loading&&!metadata)return(<div className="app"><Sidebar currentPage={currentPage} onChange={setCurrentPage} myUniversity={myUniversity} isOpen={sidebarOpen} onClose={()=>setSidebarOpen(false)}/><div className="main-content"><div className="page-header"><div className="page-title">読み込み中...</div></div><div className="content"><div className="loading-state"><div className="spinner"></div></div></div></div></div>);
+
+    const pageTitle=currentPage.type==="my-university"?"★ マイ大学":currentPage.type==="comparison"?"⇔ 大学比較":currentPage.type==="ip-funnel"?"📊 知財パイプライン":currentPage.id;
+    const pageMeta=currentPage.type==="my-university"?(myUniversity?myUniversity.name:"未設定"):currentPage.type==="comparison"?"最大4大学を比較":currentPage.type==="ip-funnel"?"発明→出願→保有→許諾→収入":"H30–R6";
+
+    return(<div className={`app ${sidebarCollapsed?"sidebar-collapsed":""}`}>
+        <Sidebar currentPage={currentPage} onChange={setCurrentPage} myUniversity={myUniversity} isOpen={sidebarOpen} onClose={()=>setSidebarOpen(false)} collapsed={sidebarCollapsed} onToggleCollapse={()=>setSidebarCollapsed(!sidebarCollapsed)}/>
+        <div className="main-content">
+            <div className="page-header">
+                <div className="page-header-left">
+                    <button className="menu-btn" onClick={()=>setSidebarOpen(true)} style={{display:sidebarCollapsed||window.innerWidth<=1023?"flex":"none"}}><IC.menu size={20}/></button>
+                    <nav className="breadcrumb" aria-label="breadcrumb">
+                        <span style={{cursor:"pointer"}} onClick={()=>setCurrentPage({type:"category",id:"概要"})}>ダッシュボード</span>
+                        <span className="breadcrumb-sep"><IC.chevronR size={14}/></span>
+                        <span className="breadcrumb-current">{pageTitle}</span>
+                    </nav>
+                </div>
+                <div className="page-header-right">
+                    {myUniversity?<div className="myuni-chip" onClick={()=>setCurrentPage({type:"my-university",id:null})}>★ {myUniversity.name}</div>:<div className="myuni-chip myuni-chip-set" onClick={()=>setCurrentPage({type:"my-university",id:null})}>マイ大学を設定</div>}
+                    <button className="theme-toggle" onClick={toggleTheme}>{theme==="dark"?"☀️":"🌙"}</button>
+                    <button className="theme-toggle" onClick={()=>setCmdOpen(true)} title="⌘K" style={{fontSize:13,fontFamily:"var(--font-display)"}}>⌘K</button>
+                </div>
+            </div>
+            <div className="print-header">{myUniversity?`${myUniversity.name} — 産学連携ダッシュボード`:"産学連携ダッシュボード"} ({new Date().toLocaleDateString("ja-JP")})</div>
+            <CommandPalette open={cmdOpen} onClose={()=>setCmdOpen(false)} onNavigate={setCurrentPage} onSetMyUni={handleSetMyUni} metadata={metadata}/>
+            <div className="content">{error&&<div className="error-banner">{error}</div>}
+                {currentPage.type==="category"&&<CategoryPage key={currentPage.id} category={currentPage.id} metadata={metadata} onSetMyUni={handleSetMyUni}/>}
+                {currentPage.type==="my-university"&&<MyUniversityPage myUniversity={myUniversity} metadata={metadata} onSetMyUni={handleSetMyUni} onClear={handleClearMyUni}/>}
+                {currentPage.type==="comparison"&&<ComparisonPage myUniversity={myUniversity} metadata={metadata}/>}
+                {currentPage.type==="ip-funnel"&&<IPFunnelPage myUniversity={myUniversity} metadata={metadata}/>}
+            </div>
+            <Footer/>
+        </div>
+    </div>);
+}
+ReactDOM.render(<App/>,document.getElementById("root"));
+</script>
+</body>
+</html>
