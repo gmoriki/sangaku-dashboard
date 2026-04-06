@@ -102,7 +102,7 @@
         .sidebar{transition:width 200ms cubic-bezier(0.4,0,0.2,1),transform .3s,background .3s;will-change:width;overflow:hidden}
         .sidebar-collapse-btn{background:none;border:none;color:var(--sidebar-text);cursor:pointer;padding:10px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;width:100%;border-top:1px solid var(--sidebar-border);transition:color .15s}
         .sidebar-collapse-btn:hover{color:var(--sidebar-active);background:var(--card-hover)}
-        .sidebar-icon{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+        .sidebar-icon{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;overflow:visible}
         .sidebar-label{white-space:nowrap;overflow:hidden;transition:opacity 150ms ease,width 150ms ease}
 
         .sidebar.collapsed{width:56px;min-width:56px}
@@ -147,7 +147,7 @@
         .page-title{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.02em}
         .page-meta{font-size:13px;color:var(--text-2)}
         .page-header-right{display:flex;align-items:center;gap:12px}
-        .myuni-chip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-full);font-size:13px;color:var(--blue-900);cursor:pointer;font-weight:600;transition:all .15s}
+        .myuni-chip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-full);font-size:13px;color:var(--badge-pos-text);cursor:pointer;font-weight:600;transition:all .15s}
         .myuni-chip:hover{box-shadow:var(--shadow-sm)}
         .myuni-chip-set{color:var(--text-3);border:1px dashed var(--border);background:transparent;font-weight:500}
         @media(max-width:767px){.page-header{padding:12px 16px}.page-title{font-size:20px}.myuni-chip{font-size:11px;padding:5px 10px}}
@@ -157,7 +157,7 @@
         .theme-toggle:hover{background:var(--card-hover);box-shadow:var(--shadow-sm)}
 
         /* Context bar */
-        .context-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 16px;background:var(--blue-50);border-radius:var(--radius-md);font-size:13px;color:var(--blue-900);font-weight:500}
+        .context-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 16px;background:var(--blue-50);border-radius:var(--radius-md);font-size:13px;color:var(--badge-pos-text);font-weight:500}
         .context-bar .ctx-clear{cursor:pointer;margin-left:auto;text-decoration:underline;font-weight:400}
 
         /* Filters */
@@ -180,8 +180,8 @@
            Phase 5: KPI Bento Grid
            ============================================================ */
         .kpi-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
-        .kpi-card{flex:1 1 150px;min-width:0}
-        @media(max-width:767px){.kpi-card{flex:1 1 calc(50% - 6px)}}
+        .kpi-card{flex:0 1 200px;min-width:0}
+        @media(max-width:767px){.kpi-card{flex:0 1 calc(50% - 6px)}}
 
         .kpi-card{background:var(--card);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-xs);border:1.5px solid transparent;position:relative;overflow:hidden}
         .kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);background:var(--card-hover)}
@@ -201,9 +201,9 @@
         .detail-meta{font-size:13px;color:var(--text-2);margin-left:12px}
 
         /* Charts */
-        .charts-row{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:28px}
+        .charts-row{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:28px}.charts-row>*{min-width:0}
         @media(max-width:900px){.charts-row{grid-template-columns:1fr}}
-        .chart-panel{background:var(--card);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-xs);transition:background .3s}.chart-panel.full{margin-bottom:28px}
+        .chart-panel{background:var(--card);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-xs);transition:background .3s;overflow:hidden;min-width:0}.chart-panel.full{margin-bottom:28px}
         .chart-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:4px;letter-spacing:-.01em}
         .chart-subtitle{font-size:12px;color:var(--text-2);margin-bottom:18px}.chart-note{font-size:11px;color:var(--red-600);margin-bottom:10px}
         .chart-canvas-wrapper{position:relative;width:100%}.chart-canvas-wrapper.trend{height:300px}.chart-canvas-wrapper.small{height:260px}.chart-canvas-wrapper.radar{height:380px}
@@ -241,7 +241,7 @@
 
         /* MyUni & Compare */
         .uni-banner{background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-lg);padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
-        .uni-banner-name{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--blue-900);letter-spacing:-.02em}.uni-banner-meta{font-size:13px;color:var(--text-2);margin-left:14px}
+        .uni-banner-name{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.02em}.uni-banner-meta{font-size:13px;color:var(--text-2);margin-left:14px}
         .btn-sm{padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .15s}.btn-sm:hover{background:var(--card-hover)}.btn-sm.danger{border-color:var(--red-600);color:var(--red-600)}.btn-sm.danger:hover{background:var(--red-50)}
         .category-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
         .cat-tab{padding:8px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-2);transition:all .15s}
@@ -334,7 +334,7 @@
         .skel-title{height:24px;width:40%;margin-bottom:16px}
 
         /* P2-4: Command Palette */
-        .cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:20vh;backdrop-filter:blur(4px)}
+        .cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:20vh;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
         .cmd-palette{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);width:520px;max-height:400px;overflow:hidden;box-shadow:var(--shadow-lg)}
         .cmd-input{width:100%;padding:16px 20px;border:none;border-bottom:1px solid var(--border);font-size:16px;font-family:var(--font-body);background:transparent;color:var(--text);outline:none}
         .cmd-results{max-height:320px;overflow-y:auto}
@@ -381,7 +381,7 @@ function nullify(values,avail){if(!avail||!values)return values;return values.ma
 
 // API
 // Lucide SVG Icons (inline, no CDN dependency)
-const I=({d,size=20,...p})=>React.createElement('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',...p},
+const I=({d,size=20,...p})=>React.createElement('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.75,strokeLinecap:'round',strokeLinejoin:'round',style:{overflow:'visible'},...p},
     ...(Array.isArray(d)?d:[d]).map((path,i)=>React.createElement('path',{key:i,d:path})));
 const IC={
     home:(p)=><I d={["m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z","M9 22V12h6v10"]} {...p}/>,
@@ -698,10 +698,18 @@ function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
                     <span className="detail-title">{kpiL(selKpi,cat)}</span>
                     <span className="detail-meta">詳細分析</span>
                 </div>
+                {isSparse(avail?.[selKpi])?
+                /* 疎データ: テーブル形式で表示 */
+                <div className="table-panel"><div className="table-toolbar"><div className="table-title">年度別データ（マイ大学 vs 全国平均）</div></div>
+                <div className="table-scroll"><table><thead><tr><th>年度</th><th className="numeric">{myUniversity.name}</th><th className="numeric">全国平均</th><th className="numeric">順位</th></tr></thead>
+                <tbody>{YL.map((y,i)=>{const uv=(uniKpis[selKpi]||[])[i];const nv=(natData[selKpi]||[])[i];const a=avail?.[selKpi];const hasData=a?a[i]:true;
+                    return<tr key={i} style={!hasData?{opacity:.4}:{}}><td>{y}{!hasData?" (調査なし)":""}</td><td className="numeric">{hasData?fmtVal(uv,selKpi):"-"}</td><td className="numeric">{hasData?fmtVal(nv,selKpi):"-"}</td><td className="numeric">{hasData&&ranks?.[selKpi]?`${ranks[selKpi].rank}位/${ranks[selKpi].total}`:"-"}</td></tr>})}</tbody></table></div></div>
+                :
+                /* 通常データ: チャート形式 */
                 <div className="charts-row">
                     <IndexChart uniData={uniKpis} natData={natData} kpi={selKpi} uniName={myUniversity.name} title="変化率推移" subtitle={`${myUniversity.name} vs 全国（基準年=100%）`} avail={avail}/>
                     {ctx&&ctx.context?<BulletGraph contextData={ctx.context} kpi={selKpi} title="全国順位 前後±5" subtitle={`${ctx.target?.rank}位/${ctx.total_ranked}機関`}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
-                </div>
+                </div>}
             </div>
         </>}
     </div>);
