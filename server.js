@@ -107,8 +107,10 @@ function getUniversities({ typeFilter, prefFilter, search, kpiSort, sortDir = 'd
     filtered = [...filtered].sort((a, b) => {
       const aVals = (a.kpis && a.kpis[kpiSort]) || [];
       const bVals = (b.kpis && b.kpis[kpiSort]) || [];
-      const aVal = aVals.length > 0 && aVals[aVals.length - 1] != null ? aVals[aVals.length - 1] : -Infinity;
-      const bVal = bVals.length > 0 && bVals[bVals.length - 1] != null ? bVals[bVals.length - 1] : -Infinity;
+      // Use latest non-null value (not just last index) for sparse KPIs
+      let aVal = -Infinity, bVal = -Infinity;
+      for (let i = aVals.length - 1; i >= 0; i--) { if (aVals[i] != null) { aVal = aVals[i]; break; } }
+      for (let i = bVals.length - 1; i >= 0; i--) { if (bVals[i] != null) { bVal = bVals[i]; break; } }
       return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
     });
   }
