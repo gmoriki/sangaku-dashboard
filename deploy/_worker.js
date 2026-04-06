@@ -64,12 +64,31 @@ export default {
         return jsonResponse({ years: data.metadata.years, data: result, filtered: true });
       }
 
-      if (!kpiList) return jsonResponse({ years: data.metadata.years, data: data.national });
-      const result = {};
-      for (const kpi of kpiList) {
-        if (data.national[kpi] !== undefined) result[kpi] = data.national[kpi];
+      const natData = {};
+      const kpis = kpiList || data.metadata.kpis;
+      for (const kpi of kpis) {
+        if (data.national[kpi] !== undefined) natData[kpi] = data.national[kpi];
       }
-      return jsonResponse({ years: data.metadata.years, data: result });
+
+      // mode=avg: 報告機関数で割った平均値
+      if (params.get('mode') === 'avg') {
+        const avgData = {};
+        for (const kpi of kpis) {
+          const nat = natData[kpi] || data.national[kpi] || [];
+          avgData[kpi] = data.metadata.years.map((_, yi) => {
+            if (nat[yi] == null) return null;
+            let count = 0;
+            for (const uni of data.universities) {
+              const v = (uni.kpis?.[kpi] || [])[yi];
+              if (v != null) count++;
+            }
+            return count > 0 ? nat[yi] / count : null;
+          });
+        }
+        return jsonResponse({ years: data.metadata.years, data: avgData, mode: 'avg' });
+      }
+
+      return jsonResponse({ years: data.metadata.years, data: kpiList ? natData : data.national });
     }
 
     // /api/by-type
