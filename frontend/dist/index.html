@@ -25,7 +25,7 @@
             --shadow-md: 0 4px 12px rgba(0,0,0,.07);
             --shadow-lg: 0 12px 24px rgba(0,0,0,.1);
             --sidebar-width: 240px;
-            --blue-50:#E8F1FE;--blue-100:#D9E6FF;--blue-200:#C5D7FB;--blue-400:#7096F8;--blue-600:#3460FB;--blue-900:#0017C1;--blue-1200:#000060;
+            --primary-50:#ECFDF5;--primary-100:#D1FAE5;--primary-200:#A7F3D0;--primary-400:#34D399;--primary-600:#059669;--primary-900:#065F46;--primary-1200:#022C22;
             --orange-500:#FB5B01;--green-600:#259D63;--cyan-600:#00A3BF;
             --red-600:#FE3939;--red-50:#FEF2F2;
         }
@@ -36,12 +36,12 @@
             --text: #111827; --text-2: #6B7280; --text-3: #9CA3AF;
             --border: #E5E7EB; --border-2: #F3F4F6;
             --sidebar-bg: #FFFFFF; --sidebar-text: #6B7280; --sidebar-active: #111827; --sidebar-border: #E5E7EB;
-            --sidebar-active-bg: var(--blue-50); --sidebar-active-text: var(--blue-900); --sidebar-active-border: var(--blue-600);
-            --chart-line: #0017C1; --chart-line-fill-top: rgba(0,23,193,.12); --chart-line-fill-bottom: rgba(0,23,193,.01);
+            --sidebar-active-bg: var(--primary-50); --sidebar-active-text: var(--primary-900); --sidebar-active-border: var(--primary-600);
+            --chart-line: #059669; --chart-line-fill-top: rgba(5,150,105,.12); --chart-line-fill-bottom: rgba(5,150,105,.01);
             --chart-grid: #F0F1F5; --chart-text: #6B7280;
             --input-bg: #fff; --badge-bg: rgba(255,255,255,.12);
-            --kpi-fill: rgba(0,23,193,.06);
-            --badge-pos-text: #0017C1; --badge-pos-bg: #E8F1FE;
+            --kpi-fill: rgba(5,150,105,.06);
+            --badge-pos-text: #065F46; --badge-pos-bg: #ECFDF5;
             --badge-neg-text: #DC2626; --badge-neg-bg: #FEF2F2;
             --badge-neu-text: #6B7280; --badge-neu-bg: #F3F4F6;
         }
@@ -49,17 +49,17 @@
         /* Phase 1: Dark theme */
         [data-theme="dark"] {
             --bg: #0F1117; --card: #1C2030; --card-hover: #252A3A;
-            --text: #EAEDF2; --text-2: #8B92A0; --text-3: #5C6370;
+            --text: #EAEDF2; --text-2: #8B92A0; --text-3: #7A8290;
             --border: #2A3040; --border-2: #1E2333;
             --sidebar-bg: #13161E; --sidebar-text: #8B92A0; --sidebar-active: #EAEDF2; --sidebar-border: #2A3040;
-            --sidebar-active-bg: rgba(107,147,255,.12); --sidebar-active-text: #fff; --sidebar-active-border: #6B93FF;
-            --chart-line: #6B93FF; --chart-line-fill-top: rgba(107,147,255,.20); --chart-line-fill-bottom: rgba(107,147,255,.02);
+            --sidebar-active-bg: rgba(52,211,153,.12); --sidebar-active-text: #fff; --sidebar-active-border: #34D399;
+            --chart-line: #34D399; --chart-line-fill-top: rgba(52,211,153,.20); --chart-line-fill-bottom: rgba(52,211,153,.02);
             --chart-grid: #2A3040; --chart-text: #8B92A0;
             --input-bg: #1E2333; --badge-bg: rgba(255,255,255,.06);
-            --kpi-fill: rgba(52,96,251,.15);
-            --blue-50: #172554; --blue-100: #1E3A7A; --blue-200: #264694;
+            --kpi-fill: rgba(52,211,153,.15);
+            --primary-50: #0D3326; --primary-100: #14532D; --primary-200: #166534;
             --red-50: #3B1520;
-            --badge-pos-text: #93C5FD; --badge-pos-bg: #1E3A5F;
+            --badge-pos-text: #6EE7B7; --badge-pos-bg: #14532D;
             --badge-neg-text: #FCA5A5; --badge-neg-bg: #4C1D1D;
             --badge-neu-text: #8B92A0; --badge-neu-bg: #2A3040;
         }
@@ -90,7 +90,7 @@
         .sidebar-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--sidebar-active);letter-spacing:-.01em;line-height:1.4}
         .sidebar-subtitle{font-size:12px;color:var(--sidebar-text);margin-top:6px}
         .sidebar-nav{padding:12px 0;flex:1;overflow-y:auto}
-        .sidebar-item{display:flex;align-items:center;padding:11px 24px;cursor:pointer;font-size:14px;font-weight:500;color:var(--sidebar-text);transition:all .15s;border-left:3px solid transparent;gap:8px}
+        .sidebar-item{display:flex;align-items:center;padding:10px 16px;cursor:pointer;font-size:14px;font-weight:500;color:var(--sidebar-text);transition:all .15s;border-left:3px solid transparent;gap:8px}
         .sidebar-item:hover{background:var(--card-hover);color:var(--sidebar-active)}
         .sidebar-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);border-left-color:var(--sidebar-active-border);font-weight:600}
         .sidebar-sep{height:1px;background:var(--sidebar-border);margin:10px 24px}
@@ -108,7 +108,7 @@
         .sidebar.collapsed{width:56px;min-width:56px}
         .sidebar.collapsed .sidebar-header{padding:16px 8px;text-align:center}
         .sidebar.collapsed .sidebar-title,.sidebar.collapsed .sidebar-subtitle,.sidebar.collapsed .sidebar-footer,.sidebar.collapsed .sidebar-badge{display:none}
-        .sidebar.collapsed .sidebar-item{justify-content:center;padding:12px 0;border-left:none;gap:0}
+        .sidebar.collapsed .sidebar-item{justify-content:center;padding:10px 0;border-left:none;gap:0}
         .sidebar.collapsed .sidebar-label{opacity:0;width:0;padding:0;margin:0;overflow:hidden}
         .sidebar.collapsed .sidebar-sep{margin:8px 12px}
         /* CSS tooltip on hover when collapsed */
@@ -147,7 +147,7 @@
         .page-title{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.02em}
         .page-meta{font-size:13px;color:var(--text-2)}
         .page-header-right{display:flex;align-items:center;gap:12px}
-        .myuni-chip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-full);font-size:13px;color:var(--badge-pos-text);cursor:pointer;font-weight:600;transition:all .15s}
+        .myuni-chip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--primary-50);border:1px solid var(--primary-200);border-radius:var(--radius-full);font-size:13px;color:var(--badge-pos-text);cursor:pointer;font-weight:600;transition:all .15s}
         .myuni-chip:hover{box-shadow:var(--shadow-sm)}
         .myuni-chip-set{color:var(--text-3);border:1px dashed var(--border);background:transparent;font-weight:500}
         @media(max-width:767px){.page-header{padding:12px 16px}.page-title{font-size:20px}.myuni-chip{font-size:11px;padding:5px 10px}}
@@ -157,7 +157,7 @@
         .theme-toggle:hover{background:var(--card-hover);box-shadow:var(--shadow-sm)}
 
         /* Context bar */
-        .context-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 16px;background:var(--blue-50);border-radius:var(--radius-md);font-size:13px;color:var(--badge-pos-text);font-weight:500}
+        .context-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 16px;background:var(--primary-50);border-radius:var(--radius-md);font-size:13px;color:var(--badge-pos-text);font-weight:500}
         .context-bar .ctx-clear{cursor:pointer;margin-left:auto;text-decoration:underline;font-weight:400}
 
         /* Filters */
@@ -166,7 +166,7 @@
         .filter-label{font-size:12px;color:var(--text-2);font-weight:600;letter-spacing:.02em}
         .filter-select,.filter-input{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:14px;font-family:var(--font-body);background:var(--input-bg);color:var(--text);min-width:0;width:100%;transition:border .15s}
         .filter-group{flex:1;min-width:100px}
-        .filter-select:focus,.filter-input:focus{outline:none;border-color:var(--blue-600);box-shadow:0 0 0 3px var(--blue-50)}
+        .filter-select:focus,.filter-input:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
         .search-wrapper{position:relative}
         .autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:0 0 var(--radius-md) var(--radius-md);box-shadow:var(--shadow-lg);z-index:20;max-height:360px;overflow-y:auto}
         .ac-group-label{padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-3);background:var(--border-2);letter-spacing:.05em}
@@ -174,7 +174,7 @@
         .autocomplete-item:hover{background:var(--card-hover)}
         .autocomplete-item-name{font-size:14px;font-weight:600}.autocomplete-item-meta{font-size:12px;color:var(--text-2)}
         .ac-btn{font-size:11px;padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);background:var(--card);font-family:var(--font-body);font-weight:500;white-space:nowrap;transition:all .15s;color:var(--text)}
-        .ac-btn:hover{background:var(--card-hover)}.ac-btn.primary{background:var(--blue-900);color:#fff;border-color:var(--blue-900)}.ac-btn.primary:hover{opacity:.9}
+        .ac-btn:hover{background:var(--card-hover)}.ac-btn.primary{background:var(--primary-900);color:#fff;border-color:var(--primary-900)}.ac-btn.primary:hover{opacity:.9}
 
         /* ============================================================
            Phase 5: KPI Bento Grid
@@ -185,9 +185,9 @@
 
         .kpi-card{background:var(--card);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-xs);border:1.5px solid transparent;position:relative;overflow:hidden}
         .kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);background:var(--card-hover)}
-        .kpi-card.selected{border-color:var(--blue-900);box-shadow:0 0 0 3px var(--blue-100),var(--shadow-md)}
+        .kpi-card.selected{border-color:var(--primary-900);box-shadow:0 0 0 3px var(--primary-100),var(--shadow-md)}
         .kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:var(--radius-lg) 0 0 var(--radius-lg)}
-        .kpi-card.signal-up::before{background:var(--blue-600)}.kpi-card.signal-flat::before{background:var(--text-3)}.kpi-card.signal-down::before{background:var(--red-600)}
+        .kpi-card.signal-up::before{background:var(--primary-600)}.kpi-card.signal-flat::before{background:var(--text-3)}.kpi-card.signal-down::before{background:var(--red-600)}
         .kpi-label{font-size:13px;color:var(--text-2);font-weight:600;margin-bottom:10px}
         .kpi-value{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1;margin-bottom:4px;letter-spacing:-.02em}
         .kpi-change{display:inline-flex;align-items:center;font-size:13px;font-weight:700;padding:3px 10px;border-radius:var(--radius-sm)}
@@ -196,7 +196,7 @@
         .kpi-chart{margin-top:8px;height:36px;width:100%}
 
         /* Detail panel */
-        .detail-panel{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:28px;margin-bottom:28px;border-top:3px solid var(--blue-900);transition:background .3s}
+        .detail-panel{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:28px;margin-bottom:28px;border-top:3px solid var(--primary-900);transition:background .3s}
         .detail-title{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.02em}
         .detail-meta{font-size:13px;color:var(--text-2);margin-left:12px}
 
@@ -214,7 +214,7 @@
         .table-toolbar{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
         .table-title{font-family:var(--font-display);font-size:17px;font-weight:700}.table-count{font-size:13px;color:var(--text-2)}
         .table-search{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;font-family:var(--font-body);width:220px;background:var(--input-bg);color:var(--text);transition:border .15s}
-        .table-search:focus{outline:none;border-color:var(--blue-600);box-shadow:0 0 0 3px var(--blue-50)}
+        .table-search:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
         .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
         table{width:100%;border-collapse:collapse;font-size:14px;min-width:700px}
         thead{background:var(--border-2)}
@@ -222,37 +222,38 @@
         thead th.numeric{text-align:right}
         tbody td{padding:12px 16px;border-bottom:1px solid var(--border-2);color:var(--text);font-variant-numeric:tabular-nums;transition:background .1s}
         tbody td.numeric{text-align:right;font-family:var(--font-display);font-weight:500}
-        tbody tr:hover{background:var(--blue-50)}
-        td.highlight{background:var(--blue-100);font-weight:700;color:var(--blue-900)}
+        tbody tr:hover{background:var(--primary-50)}
+        td.highlight{background:var(--primary-100);font-weight:700;color:var(--primary-900)}
         .pagination{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 24px;border-top:1px solid var(--border)}
         .pagination-btn{padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;color:var(--text);transition:all .15s}
-        .pagination-btn:disabled{opacity:.35;cursor:default}.pagination-btn:not(:disabled):hover{border-color:var(--blue-600);background:var(--blue-50)}
+        .pagination-btn:disabled{opacity:.35;cursor:default}.pagination-btn:not(:disabled):hover{border-color:var(--primary-600);background:var(--primary-50)}
         .pagination-info{font-size:13px;color:var(--text-2)}
 
         /* Footer */
         .dashboard-footer{border-top:1px solid var(--border);padding:20px 40px;font-size:12px;color:var(--text-3);line-height:1.8;transition:background .3s,color .3s}
-        .dashboard-footer a{color:var(--blue-900);text-decoration:none;font-weight:500}
+        .dashboard-footer a{color:var(--primary-900);text-decoration:none;font-weight:500}
 
         /* States */
         .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;color:var(--text-2);font-size:14px}
-        .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue-600);border-radius:50%;animation:pulse 1s ease-in-out infinite;margin-bottom:16px}
+        .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary-600);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px}
+        @keyframes spin{to{transform:rotate(360deg)}}
         .error-banner{background:var(--red-50);border:1px solid var(--red-600);color:var(--red-600);padding:12px 20px;border-radius:var(--radius-md);font-size:14px;margin-bottom:20px}
         .empty-state{text-align:center;padding:48px;color:var(--text-2);font-size:14px}
 
         /* MyUni & Compare */
-        .uni-banner{background:var(--blue-50);border:1px solid var(--blue-200);border-radius:var(--radius-lg);padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
+        .uni-banner{background:var(--primary-50);border:1px solid var(--primary-200);border-radius:var(--radius-lg);padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
         .uni-banner-name{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.02em}.uni-banner-meta{font-size:13px;color:var(--text-2);margin-left:14px}
         .btn-sm{padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .15s}.btn-sm:hover{background:var(--card-hover)}.btn-sm.danger{border-color:var(--red-600);color:var(--red-600)}.btn-sm.danger:hover{background:var(--red-50)}
         .category-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
         .cat-tab{padding:8px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-2);transition:all .15s}
-        .cat-tab:hover{background:var(--card-hover)}.cat-tab.active{background:var(--blue-900);color:#fff;border-color:var(--blue-900);box-shadow:var(--shadow-sm)}
+        .cat-tab:hover{background:var(--card-hover)}.cat-tab.active{background:var(--primary-900);color:#fff;border-color:var(--primary-900);box-shadow:var(--shadow-sm)}
         .setup-box{max-width:500px;margin:80px auto;text-align:center}.setup-box h2{font-family:var(--font-display);font-size:26px;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}.setup-box p{color:var(--text-2);font-size:14px;margin-bottom:24px}
         .compare-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
         .compare-slot{background:var(--card);border:2px dashed var(--border);border-radius:var(--radius-lg);padding:16px;min-height:90px;display:flex;flex-direction:column;justify-content:center;position:relative;transition:all .15s}
         .compare-slot.filled{border-style:solid;box-shadow:var(--shadow-xs)}.compare-slot .slot-name{font-family:var(--font-display);font-size:16px;font-weight:700}.compare-slot .slot-meta{font-size:12px;color:var(--text-2);margin-top:2px}
         .compare-slot .slot-color{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:8px}
         .compare-slot .slot-remove{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-3);transition:color .1s}.compare-slot .slot-remove:hover{color:var(--red-600)}
-        .compare-slot .slot-add{text-align:center;color:var(--text-3);cursor:pointer;font-size:14px;font-weight:500;transition:color .15s}.compare-slot .slot-add:hover{color:var(--blue-900)}
+        .compare-slot .slot-add{text-align:center;color:var(--text-3);cursor:pointer;font-size:14px;font-weight:500;transition:color .15s}.compare-slot .slot-add:hover{color:var(--primary-900)}
         .comp-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:28px}
         .comp-kpi-panel{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-xs);transition:background .3s}
         .comp-kpi-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:12px}
@@ -261,15 +262,15 @@
         .chart-panel{position:relative}
         .export-btn{position:absolute;top:16px;right:16px;background:var(--card-hover);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;font-size:12px;color:var(--text-2);opacity:0;transition:opacity .2s;font-family:var(--font-body);z-index:5}
         .chart-panel:hover .export-btn,.detail-panel:hover .export-btn{opacity:1}
-        .export-btn:hover{background:var(--blue-50);color:var(--blue-900);border-color:var(--blue-600)}
+        .export-btn:hover{background:var(--primary-50);color:var(--primary-900);border-color:var(--primary-600)}
         .csv-btn{padding:6px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:12px;font-family:var(--font-body);color:var(--text-2);transition:all .15s}
-        .csv-btn:hover{background:var(--blue-50);color:var(--blue-900);border-color:var(--blue-600)}
+        .csv-btn:hover{background:var(--primary-50);color:var(--primary-900);border-color:var(--primary-600)}
 
         /* P0-3: Percentile bar */
         .pbar{display:flex;align-items:center;gap:3px;margin-top:8px}
         .pbar-dot{width:8px;height:8px;border-radius:2px;background:var(--border);transition:background .2s}
-        .pbar-dot.filled{background:var(--blue-600)}
-        .pbar-dot.filled.top{background:var(--blue-900)}
+        .pbar-dot.filled{background:var(--primary-600)}
+        .pbar-dot.filled.top{background:var(--primary-900)}
         .pbar-label{font-size:11px;color:var(--text-2);margin-left:6px;white-space:nowrap}
         .trend-icon{font-size:12px;font-weight:800}
 
@@ -277,7 +278,7 @@
         .exec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:28px}
         .exec-card{background:var(--card);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--shadow-xs);border-left:4px solid var(--border);transition:all .2s}
         .exec-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-        .exec-card.strength{border-left-color:var(--blue-600)}
+        .exec-card.strength{border-left-color:var(--primary-600)}
         .exec-card.caution{border-left-color:var(--red-600)}
         .exec-card.neutral{border-left-color:var(--text-3)}
         .exec-cat{font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:6px}
@@ -294,12 +295,12 @@
         .landing-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px 40px}
         .landing-headline{font-family:var(--font-display);font-size:32px;font-weight:900;line-height:1.3;letter-spacing:-.02em;margin-bottom:12px;color:var(--text)}
         .landing-sub{font-size:15px;color:var(--text-2);max-width:480px;margin-bottom:0;line-height:1.7}
-        .landing-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--blue-900);color:#fff;border:none;border-radius:var(--radius-lg);font-family:var(--font-display);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-md)}
+        .landing-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--primary-900);color:#fff;border:none;border-radius:var(--radius-lg);font-family:var(--font-display);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-md)}
         .landing-cta:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
         .landing-stats{display:flex;gap:48px;margin-top:48px;flex-wrap:wrap;justify-content:center}
         .landing-stat{text-align:center}
-        .landing-stat-num{font-family:var(--font-display);font-size:40px;font-weight:900;color:var(--blue-900);letter-spacing:-.03em}
-        [data-theme="dark"] .landing-stat-num{color:var(--blue-400)}
+        .landing-stat-num{font-family:var(--font-display);font-size:40px;font-weight:900;color:var(--primary-900);letter-spacing:-.03em}
+        [data-theme="dark"] .landing-stat-num{color:var(--primary-400)}
         .landing-stat-label{font-size:13px;color:var(--text-2);margin-top:4px}
         .landing-features{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px;margin:48px auto;padding:0 24px}
         .landing-feature{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .2s}
@@ -323,7 +324,7 @@
         }
         .print-header{display:none;text-align:center;margin-bottom:16px;font-family:var(--font-display);font-size:20px;font-weight:800}
         .print-btn{padding:6px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:12px;font-family:var(--font-body);color:var(--text-2);transition:all .15s}
-        .print-btn:hover{background:var(--blue-50);color:var(--blue-900)}
+        .print-btn:hover{background:var(--primary-50);color:var(--primary-900)}
 
         /* P2-5: Skeleton loading */
         @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -339,7 +340,7 @@
         .cmd-input{width:100%;padding:16px 20px;border:none;border-bottom:1px solid var(--border);font-size:16px;font-family:var(--font-body);background:transparent;color:var(--text);outline:none}
         .cmd-results{max-height:320px;overflow-y:auto}
         .cmd-item{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .1s}
-        .cmd-item:hover,.cmd-item.active{background:var(--blue-50)}
+        .cmd-item:hover,.cmd-item.active{background:var(--primary-50)}
         .cmd-item-label{font-size:14px;font-weight:500}.cmd-item-meta{font-size:12px;color:var(--text-2)}
         .cmd-kbd{font-size:11px;color:var(--text-3);background:var(--border-2);padding:2px 6px;border-radius:4px;margin-left:auto}
 
@@ -354,7 +355,7 @@
         /* P1-1: Peer group selector */
         .peer-selector{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
         .peer-chip{padding:6px 14px;border-radius:var(--radius-full);font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-2);transition:all .15s}
-        .peer-chip:hover{background:var(--card-hover)}.peer-chip.active{background:var(--blue-900);color:#fff;border-color:var(--blue-900)}
+        .peer-chip:hover{background:var(--card-hover)}.peer-chip.active{background:var(--primary-900);color:#fff;border-color:var(--primary-900)}
     </style>
 </head>
 <body>
@@ -365,14 +366,14 @@ const{useState,useEffect,useRef,useCallback}=React;
 const CATEGORY_KPIS={"概要":["共同研究_件数","共同研究_受入額","受託研究_件数","受託研究_受入額","現存ベンチャー企業数"],"共同研究":["共同研究_件数","共同研究_受入額","共同研究_直接経費","共同研究_間接経費","共同研究_件数_大企業","共同研究_件数_中小企業"],"受託研究":["受託研究_件数","受託研究_受入額","受託研究_直接経費","受託研究_間接経費","受託研究_件数_大企業","受託研究_件数_中小企業"],"治験等":["治験等合計_件数","治験等合計_受入額","治験_件数","治験_受入額","治験以外_件数","治験以外_受入額"],"発明":["発明届出件数","発明_特許出願件数","発明者数_教員","発明者数_学生"],"知的財産":["特許出願_国内","特許出願_外国","特許保有_国内","特許保有_外国","PCT出願件数"],"特許権実施許諾":["実施許諾_国内_権利数","実施許諾_外国_権利数","実施許諾収入_国内","実施許諾収入_外国"],"ベンチャー":["現存ベンチャー企業数","ベンチャー設立_当年度","ベンチャーExit_IPO_当年度","ベンチャーExit_MA_当年度"],"寄附金・URA":["寄附金_件数","寄附金_受入額","寄附講座数","寄附講座_受入額","URA_専念専従"]};
 const SIDEBAR_ITEMS=["概要","共同研究","受託研究","治験等","発明","知的財産","特許権実施許諾","ベンチャー","寄附金・URA"];
 const YL=["H30","R1","R2","R3","R4","R5","R6"];const YLL=["2018年度","2019年度","2020年度","2021年度","2022年度","2023年度","2024年度"];
-const COMP_COLORS=["#0017C1","#FB5B01","#259D63","#00A3BF"];const COMP_BG=["rgba(0,23,193,.10)","rgba(251,91,1,.10)","rgba(37,157,99,.10)","rgba(0,163,191,.10)"];const COMP_MARKERS=["circle","rect","triangle","star"];
+const COMP_COLORS=["#059669","#FB5B01","#6366F1","#00A3BF"];const COMP_BG=["rgba(5,150,105,.10)","rgba(251,91,1,.10)","rgba(99,102,241,.10)","rgba(0,163,191,.10)"];const COMP_MARKERS=["circle","rect","triangle","star"];
 const SUGGEST_GROUPS=[{label:"旧帝大",names:["東京大学","京都大学","大阪大学","東北大学","北海道大学","九州大学","名古屋大学"]},{label:"主要私立",names:["早稲田大学","慶應義塾大学","立命館大学","同志社大学","明治大学"]},{label:"主要公立",names:["大阪公立大学","東京都立大学","横浜市立大学"]}];
 
 // Utils
 const isMoney=k=>/受入額|経費|収入/.test(k);
 const fmtVal=(v,k="")=>{if(v==null||isNaN(v))return"-";if(isMoney(k)){const o=v/100000;return o>=1?o.toFixed(1)+" 億円":(v/10).toFixed(0)+" 万円"}return v.toLocaleString("ja-JP")};
 const kpiL=(k,c)=>{let l=k.replaceAll("_"," ");if(c&&c!=="概要"&&l.startsWith(c+" "))l=l.substring(c.length+1);return l};
-const getThemeColors=()=>{const dark=document.documentElement.getAttribute('data-theme')==='dark';return{grid:dark?'#2A3040':'#F0F1F5',text:dark?'#8B92A0':'#6B7280',fill:dark?'rgba(107,147,255,.15)':'rgba(0,23,193,.06)',card:dark?'#1C2030':'#FFFFFF',textStrong:dark?'#EAEDF2':'#374151',line:dark?'#6B93FF':'#0017C1',fillTop:dark?'rgba(107,147,255,.20)':'rgba(0,23,193,.12)',fillBottom:dark?'rgba(107,147,255,.02)':'rgba(0,23,193,.01)'}};
+const getThemeColors=()=>{const dark=document.documentElement.getAttribute('data-theme')==='dark';return{grid:dark?'#2A3040':'#F0F1F5',text:dark?'#8B92A0':'#6B7280',fill:dark?'rgba(52,211,153,.15)':'rgba(5,150,105,.06)',card:dark?'#1C2030':'#FFFFFF',textStrong:dark?'#EAEDF2':'#374151',line:dark?'#34D399':'#059669',fillTop:dark?'rgba(52,211,153,.20)':'rgba(5,150,105,.12)',fillBottom:dark?'rgba(52,211,153,.02)':'rgba(5,150,105,.01)'}};
 const yTick=k=>v=>{if(isMoney(k))return(v/100000).toFixed(0)+"億";if(v>=10000)return(v/10000).toFixed(0)+"万";return v.toLocaleString()};
 function calcChg(values,avail){if(!values||values.length<2)return null;let lat=null,li=-1;for(let i=values.length-1;i>=0;i--){if(avail&&!avail[i])continue;if(values[i]!=null){lat=values[i];li=i;break}}if(lat===null||li<=0)return null;let prev=null;for(let i=li-1;i>=0;i--){if(avail&&!avail[i])continue;if(values[i]!=null){prev=values[i];break}}if(prev===null||prev===0)return null;return((lat-prev)/Math.abs(prev))*100}
 function getDataNote(avail){if(!avail)return null;const a=avail.map((v,i)=>v?YL[i]:null).filter(Boolean);if(a.length>=5)return null;return`※ ${a.join("・")}の${a.length}年度分のみ`}
@@ -410,7 +411,7 @@ const SIDEBAR_ICONS={"概要":"home","共同研究":"users","受託研究":"brie
 
 const api={
     metadata:()=>fetch("/api/metadata").then(r=>r.json()),
-    national:(k,type,pref)=>{let u=`/api/national?kpis=${k.map(encodeURIComponent).join(",")}`;if(type)u+=`&type=${encodeURIComponent(type)}`;if(pref)u+=`&prefecture=${encodeURIComponent(pref)}`;return fetch(u).then(r=>r.json())},
+    national:(k,type,pref,mode)=>{let u=`/api/national?kpis=${k.map(encodeURIComponent).join(",")}`;if(type)u+=`&type=${encodeURIComponent(type)}`;if(pref)u+=`&prefecture=${encodeURIComponent(pref)}`;if(mode)u+=`&mode=${mode}`;return fetch(u).then(r=>r.json())},
     byType:k=>fetch(`/api/by-type?kpis=${k.map(encodeURIComponent).join(",")}`).then(r=>r.json()),
     ranking:(k,yi,l=10,type,pref)=>{let u=`/api/ranking?kpi=${encodeURIComponent(k)}&year_index=${yi}&limit=${l}`;if(type)u+=`&type=${encodeURIComponent(type)}`;if(pref)u+=`&prefecture=${encodeURIComponent(pref)}`;return fetch(u).then(r=>r.json())},
     universities:p=>{const q=new URLSearchParams();Object.entries(p).forEach(([k,v])=>{if(v!=null&&v!=="")q.append(k,v)});return fetch(`/api/universities?${q}`).then(r=>r.json())},
@@ -452,8 +453,8 @@ function KPICard({label,value,change,sparkData,kpi,selected,onClick,rank,dataNot
         const sparse=isSparse(avail);const dv=avail?nullify(sparkData,avail):sparkData;const tc=getThemeColors();
         inst.current=new Chart(cRef.current.getContext("2d"),{type:sparse?"scatter":"line",
             data:{labels:YL,datasets:[{data:sparse?dv.map((v,i)=>v!=null?{x:i,y:v}:null).filter(Boolean):dv,
-                borderColor:selected?tc.line:"#7096F8",backgroundColor:sparse?(selected?tc.line:"#7096F8"):tc.fill,
-                borderWidth:sparse?0:2,fill:!sparse,tension:0,spanGaps:false,pointRadius:sparse?5:3,pointBackgroundColor:selected?"#0017C1":"#7096F8",pointBorderColor:"transparent",showLine:!sparse}]},
+                borderColor:selected?tc.line:"#A7F3D0",backgroundColor:sparse?(selected?tc.line:"#A7F3D0"):tc.fill,
+                borderWidth:sparse?0:2,fill:!sparse,tension:0,spanGaps:false,pointRadius:sparse?5:3,pointBackgroundColor:selected?"#059669":"#A7F3D0",pointBorderColor:"transparent",showLine:!sparse}]},
             options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:true,callbacks:{title:i=>{const idx=sparse?i[0].raw?.x:i[0].dataIndex;return YLL[idx]||""},label:i=>fmtVal(sparse?i.raw?.y:i.raw,kpi)}}},
                 scales:sparse?{x:{type:"linear",min:-.5,max:6.5,display:false},y:{display:false}}:{x:{display:false},y:{display:false}},animation:{duration:400}}});
         return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[sparkData,selected,avail]);
@@ -494,8 +495,8 @@ function IndexChart({uniData,natData,kpi,uniName,title,subtitle,avail}){
         let baseU=null,baseN=null;for(let i=0;i<uN.length;i++){if(uN[i]!=null&&uN[i]>0){baseU=uN[i];break}}for(let i=0;i<nN.length;i++){if(nN[i]!=null&&nN[i]>0){baseN=nN[i];break}}
         if(!baseU||!baseN)return;const uIdx=uN.map(v=>v!=null?(v/baseU)*100:null);const nIdx=nN.map(v=>v!=null?(v/baseN)*100:null);const tc=getThemeColors();
         inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets:[
-            {label:uniName,data:uIdx,borderColor:"#0017C1",backgroundColor:tc.fill,borderWidth:2.5,fill:true,tension:0,spanGaps:false,pointRadius:5,pointBackgroundColor:"#0017C1",pointBorderColor:tc.card,pointBorderWidth:2},
-            {label:"全国合計",data:nIdx,borderColor:COMP_COLORS[1],backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:4,pointStyle:"triangle",pointBackgroundColor:COMP_COLORS[1],pointBorderColor:"transparent",fill:false}
+            {label:uniName,data:uIdx,borderColor:"#059669",backgroundColor:tc.fill,borderWidth:2.5,fill:true,tension:0,spanGaps:false,pointRadius:5,pointBackgroundColor:"#059669",pointBorderColor:tc.card,pointBorderWidth:2},
+            {label:"全国平均",data:nIdx,borderColor:COMP_COLORS[1],backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:4,pointStyle:"triangle",pointBackgroundColor:COMP_COLORS[1],pointBorderColor:"transparent",fill:false}
         ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:13,family:"'Noto Sans JP'"},usePointStyle:true,padding:16,color:tc.text}},datalabels:{display:false},tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>{const raw=i.datasetIndex===0?uN[i.dataIndex]:nN[i.dataIndex];return`${i.dataset.label}: ${i.raw!=null?i.raw.toFixed(1)+"%":"-"} (${fmtVal(raw,kpi)})`}}}},
             scales:{y:{border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:12},callback:v=>v+"%"},title:{display:true,text:"基準年=100%",font:{size:11},color:tc.text}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
         return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniData,natData,kpi]);
@@ -507,7 +508,7 @@ function IndexChart({uniData,natData,kpi,uniName,title,subtitle,avail}){
 function StackedBar({byTypeData,kpi,title,subtitle}){
     const cRef=useRef(null),inst=useRef(null);
     useEffect(()=>{if(!cRef.current||!byTypeData||!kpi)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
-        const types=["国立","公立","私立"];const colors=["#0017C1","#3460FB","#7096F8"];
+        const types=["国立","公立","私立"];const colors=["#059669","#34D399","#A7F3D0"];
         const datasets=types.map((t,ti)=>({label:t,data:YL.map((_,yi)=>(byTypeData[t]?.[kpi]||[])[yi]||0),backgroundColor:colors[ti]}));
         inst.current=new Chart(cRef.current.getContext("2d"),{type:"bar",data:{labels:YL,datasets},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:12},usePointStyle:true,pointStyle:"rect",padding:14,color:tc.text}},datalabels:{display:false}},scales:{x:{stacked:true,border:{display:false},grid:{color:tc.grid},ticks:{display:false}},y:{stacked:true,border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
         return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[byTypeData,kpi]);
@@ -518,7 +519,7 @@ function StackedBar({byTypeData,kpi,title,subtitle}){
 function BulletGraph({contextData,kpi,title,subtitle}){
     const cRef=useRef(null),inst=useRef(null);
     useEffect(()=>{if(!cRef.current||!contextData||!contextData.length)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
-        const labels=contextData.map(d=>d.name.length>12?d.name.substring(0,12)+"…":d.name);const vals=contextData.map(d=>d.value);const colors=contextData.map(d=>d.is_target?"#0017C1":"#C5D7FB");
+        const labels=contextData.map(d=>d.name.length>12?d.name.substring(0,12)+"…":d.name);const vals=contextData.map(d=>d.value);const colors=contextData.map(d=>d.is_target?"#059669":"#D1FAE5");
         inst.current=new Chart(cRef.current.getContext("2d"),{type:"bar",data:{labels,datasets:[{data:vals,backgroundColor:colors,borderRadius:4,barThickness:20}]},
             options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{title:i=>{const d=contextData[i[0].dataIndex];return`${d.rank}位 ${d.name}`},label:i=>fmtVal(i.raw,kpi)}}},
             scales:{x:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:11},callback:yTick(kpi)}},y:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
@@ -581,9 +582,9 @@ function LandingPage({onEnter,theme,onToggleTheme}){
             </div>
             {/* 右: 機能カード */}
             <div style={{flex:"1 1 40%",display:"flex",flexDirection:"column",gap:12}} className="anim-in anim-delay-2">
-                <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:16,padding:"24px 28px",borderLeft:"4px solid var(--blue-900)"}}>
+                <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:16,padding:"24px 28px",borderLeft:"4px solid var(--primary-900)"}}>
                     <div style={{fontSize:18,fontWeight:800,fontFamily:"var(--font-display)",marginBottom:6}}>★ マイ大学</div>
-                    <div style={{fontSize:13,color:"var(--text-2)",lineHeight:1.7}}>自分の大学を設定し、全国順位・パーセンタイル・強み弱みをエグゼクティブサマリーで即把握。全国合計との変化率比較チャート付き。</div>
+                    <div style={{fontSize:13,color:"var(--text-2)",lineHeight:1.7}}>自分の大学を設定し、全国順位・パーセンタイル・強み弱みをエグゼクティブサマリーで即把握。全国平均との変化率比較チャート付き。</div>
                 </div>
                 <div style={{display:"flex",gap:12}}>
                     <div style={{flex:1,background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:"16px 18px"}}>
@@ -681,7 +682,7 @@ function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
     const kpis=CATEGORY_KPIS[cat]||[];const selKpi=kpis[selIdx]||kpis[0];const avail=metadata?.data_availability;
     useEffect(()=>{setSelIdx(0)},[cat]);
     useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);const k=CATEGORY_KPIS[cat]||[];
-        Promise.all([api.university(myUniversity.code),api.national(k),api.universityRanks(myUniversity.code,k,metadata.years.length-1)])
+        Promise.all([api.university(myUniversity.code),api.national(k,null,null,'avg'),api.universityRanks(myUniversity.code,k,metadata.years.length-1)])
         .then(([u,n,r])=>{setUniData(u);setNatData(n.data||{});setRanks(r.ranks||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,cat,metadata]);
     useEffect(()=>{if(!myUniversity||!metadata||!selKpi)return;api.rankingContext(selKpi,myUniversity.code,metadata.years.length-1,5).then(setCtx).catch(()=>setCtx(null))},[selKpi,myUniversity,metadata]);
     if(!myUniversity)return(<div className="setup-box"><h2>マイ大学を設定</h2><p>大学を検索して設定すると、専用ダッシュボードが利用できます。</p><SmartSearch onSetMyUni={onSetMyUni} showMyUniBtn={true} placeholder="大学名で検索..." showSuggestions={true}/></div>);
@@ -689,7 +690,7 @@ function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
     const cards=kpis.map((k,i)=>{const v=uniKpis[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,cat),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,rank:ranks?.[k]||null,dataNote:a?getDataNote(a):null,avail:a}});
     return(<div>
         <div className="uni-banner anim-in"><div style={{display:"flex",alignItems:"baseline"}}><div className="uni-banner-name">{myUniversity.name}</div><div className="uni-banner-meta">{myUniversity.type} / {myUniversity.prefecture}</div></div><button className="btn-sm danger" onClick={onClear}>クリア</button></div>
-        <div className="category-tabs"><div className={`cat-tab ${cat==="サマリー"?"active":""}`} onClick={()=>setCat("サマリー")} style={cat==="サマリー"?{background:"var(--blue-900)",color:"#fff"}:{}}>📊 サマリー</div>{SIDEBAR_ITEMS.map(s=><div key={s} className={`cat-tab ${cat===s?"active":""}`} onClick={()=>setCat(s)}>{s}</div>)}</div>
+        <div className="category-tabs"><div className={`cat-tab ${cat==="サマリー"?"active":""}`} onClick={()=>setCat("サマリー")} style={cat==="サマリー"?{background:"var(--primary-900)",color:"#fff"}:{}}>📊 サマリー</div>{SIDEBAR_ITEMS.map(s=><div key={s} className={`cat-tab ${cat===s?"active":""}`} onClick={()=>setCat(s)}>{s}</div>)}</div>
         {cat==="サマリー"?<ExecutiveSummary myUniversity={myUniversity} metadata={metadata}/>:
         loading?<div className="loading-state"><div className="spinner"></div></div>:<>
             <div className="kpi-grid">{cards.map((c,i)=><KPICard key={c.kpi} {...c} selected={i===selIdx} onClick={()=>setSelIdx(i)}/>)}</div>
@@ -700,8 +701,8 @@ function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
                 </div>
                 {isSparse(avail?.[selKpi])?
                 /* 疎データ: テーブル形式で表示 */
-                <div className="table-panel"><div className="table-toolbar"><div className="table-title">年度別データ（マイ大学 vs 全国合計）</div></div>
-                <div className="table-scroll"><table><thead><tr><th>年度</th><th className="numeric">{myUniversity.name}</th><th className="numeric">全国合計</th><th className="numeric">順位</th></tr></thead>
+                <div className="table-panel"><div className="table-toolbar"><div className="table-title">年度別データ（マイ大学 vs 全国平均）</div></div>
+                <div className="table-scroll"><table><thead><tr><th>年度</th><th className="numeric">{myUniversity.name}</th><th className="numeric">全国平均</th><th className="numeric">順位</th></tr></thead>
                 <tbody>{YL.map((y,i)=>{const uv=(uniKpis[selKpi]||[])[i];const nv=(natData[selKpi]||[])[i];const a=avail?.[selKpi];const hasData=a?a[i]:true;
                     return<tr key={i} style={!hasData?{opacity:.4}:{}}><td>{y}{!hasData?" (調査なし)":""}</td><td className="numeric">{hasData?fmtVal(uv,selKpi):"-"}</td><td className="numeric">{hasData?fmtVal(nv,selKpi):"-"}</td><td className="numeric">{hasData&&ranks?.[selKpi]?`${ranks[selKpi].rank}位/${ranks[selKpi].total}`:"-"}</td></tr>})}</tbody></table></div></div>
                 :
@@ -739,7 +740,7 @@ function IPFunnelPage({myUniversity,metadata}){
             <div className="detail-title" style={{marginBottom:24}}>知財パイプライン（R6 最新年度）</div>
             <div style={{marginBottom:8,fontSize:12,color:"var(--text-3)"}}>※ 保有は累積ストック、他はフロー。段階間の比率は参考値です。</div>
             {items.map((item,i)=>{const pct=item.value!=null?Math.max((item.value/maxVal)*100,2):0;
-                const colors=["#0017C1","#3460FB","#7096F8","#00A3BF","#259D63","#FB5B01"];
+                const colors=["#059669","#34D399","#A7F3D0","#00A3BF","#259D63","#FB5B01"];
                 return(<div key={i} className="funnel-bar anim-in" style={{animationDelay:`${i*0.08}s`}}>
                     <div className="funnel-label">{item.label}</div>
                     <div className="funnel-track"><div className="funnel-fill" style={{width:`${pct}%`,background:colors[i]}}></div><div className="funnel-value">{isMoney(item.kpi)?fmtVal(item.value,item.kpi):item.value!=null?item.value.toLocaleString():"-"}</div></div>
@@ -750,8 +751,8 @@ function IPFunnelPage({myUniversity,metadata}){
         <div className="chart-panel full anim-in"><div className="chart-title">知財パイプライン 7年推移</div><div className="chart-subtitle">{myUniversity.name}</div>
             <IPFunnelTrend uniKpis={uk}/></div>
         {/* ピア比較 */}
-        <div className="table-panel anim-in"><div className="table-toolbar"><div className="table-title">コンバージョン率 — {myUniversity.name} vs 全国合計</div></div>
-            <table><thead><tr><th>段階</th><th className="numeric">{myUniversity.name}</th><th className="numeric">全国合計</th></tr></thead>
+        <div className="table-panel anim-in"><div className="table-toolbar"><div className="table-title">コンバージョン率 — {myUniversity.name} vs 全国平均</div></div>
+            <table><thead><tr><th>段階</th><th className="numeric">{myUniversity.name}</th><th className="numeric">全国平均</th></tr></thead>
             <tbody>{items.slice(1).map((item,i)=>{const uConv=items[i].value&&item.value!=null?((item.value/items[i].value)*100).toFixed(1)+"%":"-";const nPrev=(natData[items[i].kpi]||[])[yi];const nCurr=(natData[item.kpi]||[])[yi];const nConv=nPrev&&nCurr?((nCurr/nPrev)*100).toFixed(1)+"%":"-";
                 return<tr key={i}><td style={{fontWeight:600}}>{items[i].label}→{item.label}</td><td className="numeric">{uConv}</td><td className="numeric">{nConv}</td></tr>})}</tbody></table></div>
     </div>);
@@ -760,7 +761,7 @@ function IPFunnelPage({myUniversity,metadata}){
 function IPFunnelTrend({uniKpis}){
     const cRef=useRef(null),inst=useRef(null);
     useEffect(()=>{if(!cRef.current)return;if(inst.current)inst.current.destroy();const tc=getThemeColors();
-        const colors=["#0017C1","#3460FB","#7096F8","#00A3BF","#259D63","#FB5B01"];
+        const colors=["#059669","#34D399","#A7F3D0","#00A3BF","#259D63","#FB5B01"];
         const datasets=IP_FUNNEL.filter(f=>!isMoney(f.kpi)).map((f,i)=>({label:f.label,data:uniKpis[f.kpi]||[],borderColor:colors[i],backgroundColor:"transparent",borderWidth:2,tension:0,pointRadius:3,pointBackgroundColor:colors[i]}));
         inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:12},usePointStyle:true,padding:12,color:tc.text}},datalabels:{display:false}},scales:{y:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:11}}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:12}}}}}});
         return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniKpis]);

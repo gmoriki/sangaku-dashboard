@@ -315,6 +315,25 @@ app.get('/api/national', (req, res) => {
   }
 
   const data = getNationalData(kpiList);
+  // mode=avg: 報告機関数で割った平均値を返す
+  if (req.query.mode === 'avg') {
+    const avgData = {};
+    const kpis = kpiList || DATA.metadata.kpis;
+    for (const kpi of kpis) {
+      const nat = data[kpi] || DATA.national[kpi] || [];
+      avgData[kpi] = DATA.metadata.years.map((_, yi) => {
+        if (nat[yi] == null) return null;
+        // その年度・そのKPIで値を持つ大学数を数える
+        let count = 0;
+        for (const uni of DATA.universities) {
+          const v = (uni.kpis?.[kpi] || [])[yi];
+          if (v != null) count++;
+        }
+        return count > 0 ? nat[yi] / count : null;
+      });
+    }
+    return res.json({ years: DATA.metadata.years, data: avgData, mode: 'avg' });
+  }
   res.json({ years: DATA.metadata.years, data });
 });
 
