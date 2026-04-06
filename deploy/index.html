@@ -160,7 +160,7 @@
         .myuni-chip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--primary-50);border:1px solid var(--primary-200);border-radius:var(--radius-full);font-size:13px;color:var(--badge-pos-text);cursor:pointer;font-weight:600;transition:all .15s}
         .myuni-chip:hover{box-shadow:var(--shadow-sm)}
         .myuni-chip-set{color:var(--text-3);border:1px dashed var(--border);background:transparent;font-weight:500}
-        @media(max-width:767px){.page-header{padding:12px 16px}.page-title{font-size:20px}.myuni-chip{font-size:11px;padding:5px 10px}}
+        @media(max-width:767px){.page-header{padding:10px 12px}.page-title{font-size:20px}.myuni-chip{font-size:11px;padding:5px 10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.breadcrumb span:first-child,.breadcrumb .breadcrumb-sep{display:none}.page-header .cmd-k-btn{display:none}}
 
         /* Phase 1: Theme toggle */
         .theme-toggle{width:40px;height:40px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .2s}
@@ -176,6 +176,7 @@
         .filter-label{font-size:12px;color:var(--text-2);font-weight:600;letter-spacing:.02em}
         .filter-select,.filter-input{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:14px;font-family:var(--font-body);background:var(--input-bg);color:var(--text);min-width:0;width:100%;transition:border .15s}
         .filter-group{flex:1;min-width:100px}
+        @media(max-width:767px){.filter-bar{gap:8px}.filter-group{flex:1 1 calc(50% - 4px);min-width:0}.filter-group.search-wrapper{flex:1 1 100%}}
         .filter-select:focus,.filter-input:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
         .search-wrapper{position:relative}
         .autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:0 0 var(--radius-md) var(--radius-md);box-shadow:var(--shadow-lg);z-index:20;max-height:360px;overflow-y:auto}
@@ -255,6 +256,7 @@
         .uni-banner-name{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.02em}.uni-banner-meta{font-size:13px;color:var(--text-2);margin-left:14px}
         .btn-sm{padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .15s}.btn-sm:hover{background:var(--card-hover)}.btn-sm.danger{border-color:var(--red-600);color:var(--red-600)}.btn-sm.danger:hover{background:var(--red-50)}
         .category-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+        @media(max-width:767px){.category-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding-bottom:8px;margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}.cat-tab{flex-shrink:0;scroll-snap-align:start}}
         .cat-tab{padding:8px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-2);transition:all .15s}
         .cat-tab:hover{background:var(--card-hover)}.cat-tab.active{background:var(--primary-900);color:#fff;border-color:var(--primary-900);box-shadow:var(--shadow-sm)}
         .setup-box{max-width:500px;margin:80px auto;text-align:center}.setup-box h2{font-family:var(--font-display);font-size:26px;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}.setup-box p{color:var(--text-2);font-size:14px;margin-bottom:24px}
@@ -321,6 +323,21 @@
         .landing-feature-desc{font-size:14px;color:var(--text-2);line-height:1.6}
         .landing-footer{text-align:center;padding:32px;font-size:12px;color:var(--text-3)}
         @media(max-width:767px){.landing-headline{font-size:32px}.landing-sub{font-size:15px}.landing-features{grid-template-columns:1fr}.landing-feature:first-child{grid-column:span 1}.landing-stats{gap:24px}.landing-stat-num{font-size:28px}}
+        /* LP responsive */
+        .lp-container{display:flex;align-items:center;justify-content:center;padding:0 40px;gap:60px;max-width:1100px;margin:0 auto;width:100%;flex:1}
+        .lp-text{flex:1 1 50%}
+        .lp-cards{flex:1 1 40%;display:flex;flex-direction:column;gap:12px}
+        .lp-cards-row{display:flex;gap:12px}
+        .lp-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 28px;border-left:4px solid var(--primary-900)}
+        .lp-card-sm{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+        @media(max-width:767px){
+            .lp-container{flex-direction:column;padding:32px 20px 24px;gap:32px;justify-content:flex-start}
+            .lp-text{text-align:center}
+            .lp-text .landing-cta{width:100%}
+            .lp-cards{width:100%}
+            .landing{height:auto!important;min-height:100vh;overflow:auto!important}
+            .landing-headline{font-size:24px!important}
+        }
 
         /* P1-3: PDF/Print */
         @media print{
@@ -592,29 +609,27 @@ function Sidebar({currentPage,onChange,myUniversity,isOpen,onClose,collapsed,onT
 
 // Phase 6: Landing Page
 function LandingPage({onEnter,theme,onToggleTheme}){
-    return(<div className="landing" style={{height:"100vh",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+    return(<div className="landing">
         <div className="landing-nav"><div className="landing-logo" style={{fontSize:14}}>産連調査Viewer</div><button className="theme-toggle" onClick={onToggleTheme}>{theme==="dark"?"☀️":"🌙"}</button></div>
-        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 40px",gap:60,maxWidth:1100,margin:"0 auto",width:"100%"}}>
-            {/* 左: テキスト */}
-            <div style={{flex:"1 1 50%"}} className="anim-in">
+        <div className="lp-container">
+            <div className="lp-text anim-in">
                 <div style={{fontSize:11,color:"var(--text-3)",fontWeight:700,letterSpacing:".08em",marginBottom:16,textTransform:"uppercase"}}>文部科学省 産学連携等実施状況調査</div>
                 <h1 className="landing-headline" style={{fontSize:30,marginBottom:14,lineHeight:1.3}}>産連調査Viewer</h1>
                 <p style={{fontSize:14,color:"var(--text-2)",lineHeight:1.8,marginBottom:24,maxWidth:380}}>全国827大学・212短大・59高専の産学連携データ（H30〜R6 / 7年度分・58指標）を閲覧・比較できます。</p>
                 <button className="landing-cta" onClick={onEnter} style={{padding:"12px 28px",fontSize:15}}>ダッシュボードを開く</button>
                 <div style={{marginTop:24,fontSize:11,color:"var(--text-3)"}}>出典：文部科学省「産学連携等実施状況調査」</div>
             </div>
-            {/* 右: 機能カード */}
-            <div style={{flex:"1 1 40%",display:"flex",flexDirection:"column",gap:12}} className="anim-in anim-delay-2">
-                <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:16,padding:"24px 28px",borderLeft:"4px solid var(--primary-900)"}}>
+            <div className="lp-cards anim-in anim-delay-2">
+                <div className="lp-card">
                     <div style={{fontSize:18,fontWeight:800,fontFamily:"var(--font-display)",marginBottom:6}}>★ マイ大学</div>
                     <div style={{fontSize:13,color:"var(--text-2)",lineHeight:1.7}}>自分の大学を設定し、全国順位・パーセンタイル・強み弱みをエグゼクティブサマリーで即把握。全国平均との変化率比較チャート付き。</div>
                 </div>
-                <div style={{display:"flex",gap:12}}>
-                    <div style={{flex:1,background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:"16px 18px"}}>
+                <div className="lp-cards-row">
+                    <div className="lp-card-sm">
                         <div style={{fontSize:14,fontWeight:700,fontFamily:"var(--font-display)",marginBottom:4}}>⇔ 大学比較</div>
                         <div style={{fontSize:12,color:"var(--text-2)",lineHeight:1.6}}>最大4校をレーダーチャートで比較</div>
                     </div>
-                    <div style={{flex:1,background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:"16px 18px"}}>
+                    <div className="lp-card-sm">
                         <div style={{fontSize:14,fontWeight:700,fontFamily:"var(--font-display)",marginBottom:4}}>📊 知財分析</div>
                         <div style={{fontSize:12,color:"var(--text-2)",lineHeight:1.6}}>発明→出願→保有→許諾→収入のファネル</div>
                     </div>
@@ -902,7 +917,7 @@ function App(){
                 <div className="page-header-right">
                     {myUniversity?<div className="myuni-chip" onClick={()=>setCurrentPage({type:"my-university",id:null})}>★ {myUniversity.name}</div>:<div className="myuni-chip myuni-chip-set" onClick={()=>setCurrentPage({type:"my-university",id:null})}>マイ大学を設定</div>}
                     <button className="theme-toggle" onClick={toggleTheme}>{theme==="dark"?"☀️":"🌙"}</button>
-                    <button className="theme-toggle" onClick={()=>setCmdOpen(true)} title="⌘K" style={{fontSize:13,fontFamily:"var(--font-display)"}}>⌘K</button>
+                    <button className="theme-toggle cmd-k-btn" onClick={()=>setCmdOpen(true)} title="⌘K" style={{fontSize:13,fontFamily:"var(--font-display)"}}>⌘K</button>
                 </div>
             </div>
             <div className="print-header">{myUniversity?`${myUniversity.name} — 産連調査Viewer`:"産連調査Viewer"} ({new Date().toLocaleDateString("ja-JP")})</div>
