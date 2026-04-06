@@ -130,7 +130,7 @@ function getRanking({ kpi, yearIndex = 6, typeFilter, prefFilter, limit = 10 }) 
   const ranking = [];
   for (const uni of filtered) {
     const vals = (uni.kpis && uni.kpis[kpi]) || [];
-    if (vals.length > yearIndex && vals[yearIndex] != null) {
+    if (vals.length > yearIndex && vals[yearIndex] != null && vals[yearIndex] > 0) {
       ranking.push({
         name: uni.name,
         code: uni.code,
@@ -149,7 +149,7 @@ function getRankingContext({ kpi, code, yearIndex = 6, range = 5 }) {
   const ranking = [];
   for (const uni of DATA.universities) {
     const vals = (uni.kpis && uni.kpis[kpi]) || [];
-    if (vals.length > yearIndex && vals[yearIndex] != null) {
+    if (vals.length > yearIndex && vals[yearIndex] != null && vals[yearIndex] > 0) {
       ranking.push({ name: uni.name, code: uni.code, type: uni.type, prefecture: uni.prefecture, value: vals[yearIndex] });
     }
   }
@@ -173,7 +173,7 @@ function getUniversityRanks({ code, kpiList, yearIndex = 6 }) {
     const ranking = [];
     for (const uni of DATA.universities) {
       const vals = (uni.kpis && uni.kpis[kpi]) || [];
-      if (vals.length > yearIndex && vals[yearIndex] != null) {
+      if (vals.length > yearIndex && vals[yearIndex] != null && vals[yearIndex] > 0) {
         ranking.push({ code: uni.code, value: vals[yearIndex] });
       }
     }
@@ -277,7 +277,7 @@ app.get('/api/metadata', (req, res) => {
   const dataAvailability = {};
   for (const kpi of m.kpis) {
     const national = DATA.national[kpi] || [];
-    dataAvailability[kpi] = national.map(v => v !== null && v !== undefined && v !== 0);
+    dataAvailability[kpi] = national.map(v => v !== null && v !== undefined);
   }
 
   res.json({
