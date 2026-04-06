@@ -388,7 +388,7 @@ const TYPE_COLORS_L=["#1B4332","#1E40AF","#B45309"];const TYPE_COLORS_D=["#34D39
 
 // Utils
 const isMoney=k=>/受入額|経費|収入/.test(k);
-const fmtVal=(v,k="")=>{if(v==null||isNaN(v))return"-";if(isMoney(k)){const o=v/100000;return o>=1?o.toFixed(1)+" 億円":(v/10).toFixed(0)+" 万円"}return v.toLocaleString("ja-JP")};
+const fmtVal=(v,k="")=>{if(v==null||isNaN(v))return"-";if(isMoney(k)){const o=v/100000;return o>=1?o.toFixed(1)+" 億円":(v/10).toFixed(0)+" 万円"}if(Number.isInteger(v))return v.toLocaleString("ja-JP");return parseFloat(v.toFixed(1)).toLocaleString("ja-JP",{minimumFractionDigits:1,maximumFractionDigits:1})};
 const kpiL=(k,c)=>{let l=k.replaceAll("_"," ");if(c&&c!=="概要"&&l.startsWith(c+" "))l=l.substring(c.length+1);return l};
 const getThemeColors=(cat)=>{const dark=document.documentElement.getAttribute('data-theme')==='dark';const line=cat?getCatColor(cat):(dark?'#60A5FA':'#334E68');const fill=cat?getCatFill(cat):(dark?'rgba(96,165,250,.12)':'rgba(51,78,104,.06)');return{grid:dark?'#2A3040':'#F0F1F5',text:dark?'#8B92A0':'#4A5568',fill,card:dark?'#1C2030':'#FFFFFF',textStrong:dark?'#EAEDF2':'#1A202C',line,fillTop:fill,fillBottom:dark?'rgba(96,165,250,.02)':'rgba(51,78,104,.01)'}};
 const yTick=k=>v=>{if(isMoney(k))return(v/100000).toFixed(0)+"億";if(v>=10000)return(v/10000).toFixed(0)+"万";return v.toLocaleString()};
