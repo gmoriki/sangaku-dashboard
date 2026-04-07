@@ -239,6 +239,12 @@
         .pagination-btn{padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:13px;font-family:var(--font-body);font-weight:500;color:var(--text);transition:all .15s}
         .pagination-btn:disabled{opacity:.35;cursor:default}.pagination-btn:not(:disabled):hover{border-color:var(--primary-600);background:var(--primary-50)}
         .pagination-info{font-size:13px;color:var(--text-2)}
+        /* My University highlight */
+        .myuni-highlight{background:rgba(5,150,105,.06)}
+        [data-theme="dark"] .myuni-highlight{background:rgba(5,150,105,.12)}
+        .myuni-highlight td:first-child{border-left:3px solid #059669}
+        .kpi-myuni{font-size:11px;color:#059669;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+        [data-theme="dark"] .kpi-myuni{color:#34D399}
 
         /* Footer */
         .dashboard-footer{border-top:1px solid var(--border);padding:20px 40px;font-size:12px;color:var(--text-3);line-height:1.8;transition:background .3s,color .3s}
@@ -391,7 +397,7 @@
 Chart.register(ChartDataLabels);Chart.defaults.plugins.datalabels={display:false};
 Chart.defaults.font.family="'Outfit','Noto Sans JP',sans-serif";Chart.defaults.color='#4A5568';
 Chart.defaults.plugins.tooltip.backgroundColor='rgba(16,42,67,0.95)';Chart.defaults.plugins.tooltip.cornerRadius=8;Chart.defaults.plugins.tooltip.padding={top:10,bottom:10,left:14,right:14};
-const{useState,useEffect,useRef,useCallback}=React;
+const{useState,useEffect,useRef,useCallback,useMemo}=React;
 const CATEGORY_KPIS={"概要":["共同研究_件数","共同研究_受入額","受託研究_件数","受託研究_受入額","現存ベンチャー企業数"],"共同研究":["共同研究_件数","共同研究_受入額","共同研究_直接経費","共同研究_間接経費","共同研究_件数_大企業","共同研究_件数_中小企業"],"受託研究":["受託研究_件数","受託研究_受入額","受託研究_直接経費","受託研究_間接経費","受託研究_件数_大企業","受託研究_件数_中小企業"],"治験等":["治験等合計_件数","治験等合計_受入額","治験_件数","治験_受入額","治験以外_件数","治験以外_受入額"],"発明":["発明届出件数","発明_特許出願件数","発明者数_教員","発明者数_学生"],"知的財産":["特許出願_国内","特許出願_外国","特許保有_国内","特許保有_外国","PCT出願件数"],"特許権実施許諾":["実施許諾_国内_権利数","実施許諾_外国_権利数","実施許諾収入_国内","実施許諾収入_外国"],"ベンチャー":["現存ベンチャー企業数","ベンチャー設立_当年度","ベンチャーExit_IPO_当年度","ベンチャーExit_MA_当年度"],"寄附金・URA":["寄附金_件数","寄附金_受入額","寄附講座数","寄附講座_受入額","URA_専念専従"]};
 const SIDEBAR_ITEMS=["概要","共同研究","受託研究","治験等","発明","知的財産","特許権実施許諾","ベンチャー","寄附金・URA"];
 const YL=["H30","R1","R2","R3","R4","R5","R6"];const YLL=["2018年度","2019年度","2020年度","2021年度","2022年度","2023年度","2024年度"];
@@ -486,7 +492,7 @@ function SmartSearch({onSelect,onSetMyUni,placeholder="大学名を入力...",sh
 }
 
 // KPICard
-function KPICard({label,value,change,sparkData,kpi,selected,onClick,rank,dataNote,avail,big,catColor}){
+function KPICard({label,value,change,sparkData,kpi,selected,onClick,rank,dataNote,avail,big,catColor,myUniValue,myUniRank,myUniName}){
     const cRef=useRef(null),inst=useRef(null);
     useEffect(()=>{if(!cRef.current||!sparkData||sparkData.length<2)return;if(inst.current)inst.current.destroy();
         const sparse=isSparse(avail);const dv=avail?nullify(sparkData,avail):sparkData;const tc=getThemeColors();
@@ -508,20 +514,24 @@ function KPICard({label,value,change,sparkData,kpi,selected,onClick,rank,dataNot
         {change!=null&&<span className={`kpi-change ${cc}`}><span className="trend-icon">{trendIcon}</span> {change>0?"+":""}{change.toFixed(1)}%</span>}
         {rank&&<><span className="kpi-rank">全国 {rank.rank}位 / {rank.total}機関</span>
             <div className="pbar">{[...Array(10)].map((_,i)=>{const pct=1-rank.rank/rank.total;const filled=i<Math.round(pct*10);const isTop=pct>=0.8;return<span key={i} className={`pbar-dot ${filled?"filled":""} ${filled&&isTop?"top":""}`}/>})}<span className="pbar-label">上位{Math.round((rank.rank/rank.total)*100)}%</span></div></>}
+        {myUniName&&myUniValue!=null&&<div className="kpi-myuni">★ {myUniName}: {fmtVal(myUniValue,kpi)}{myUniRank?` (${myUniRank.rank}位/${myUniRank.total})`:""}</div>}
         {dataNote&&<span className="kpi-note">{dataNote}</span>}
         <div className="kpi-chart"><canvas ref={cRef}></canvas></div>
     </div>);
 }
 
 // ExpandedLineChart
-function ExpandedLineChart({data,kpi,avail,filterLabel,category}){
+function ExpandedLineChart({data,kpi,avail,filterLabel,category,myUniData,myUniName}){
     const cRef=useRef(null),inst=useRef(null);
     useEffect(()=>{if(!cRef.current||!data||!kpi)return;if(inst.current)inst.current.destroy();
         const raw=data[kpi]||[];const vals=avail?nullify(raw,avail):raw;if(!vals.length)return;const tc=getThemeColors(category);
-        inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets:[{label:kpiL(kpi),data:vals,borderColor:tc.line,backgroundColor:tc.fill,borderWidth:3,fill:true,tension:0,spanGaps:false,pointRadius:6,pointHoverRadius:8,pointBackgroundColor:tc.line,pointBorderColor:tc.card,pointBorderWidth:3}]},
-            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true,align:"top",anchor:"end",color:tc.text,font:{size:13,weight:700,family:"'Outfit'"},formatter:v=>v!=null?fmtVal(v,kpi):""},tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>fmtVal(i.raw,kpi)}}},
+        const datasets=[{label:filterLabel||kpiL(kpi),data:vals,borderColor:tc.line,backgroundColor:tc.fill,borderWidth:3,fill:true,tension:0,spanGaps:false,pointRadius:6,pointHoverRadius:8,pointBackgroundColor:tc.line,pointBorderColor:tc.card,pointBorderWidth:3}];
+        if(myUniData&&myUniData[kpi]){const muVals=avail?nullify(myUniData[kpi],avail):myUniData[kpi];datasets.push({label:"★ "+(myUniName||"マイ大学"),data:muVals,borderColor:"#059669",backgroundColor:"transparent",borderWidth:2.5,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:5,pointStyle:"circle",pointBackgroundColor:"#059669",pointBorderColor:tc.card,pointBorderWidth:2,fill:false})}
+        const hasMyUni=datasets.length>1;
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:hasMyUni,position:"bottom",labels:{font:{size:13,family:"'Noto Sans JP'"},usePointStyle:true,padding:16,color:tc.text}},datalabels:{display:true,align:"top",anchor:"end",color:(ctx)=>ctx.datasetIndex===1?"#059669":tc.text,font:{size:12,weight:700,family:"'Outfit'"},formatter:(v,ctx)=>{if(v==null)return"";if(hasMyUni&&ctx.datasetIndex===1)return fmtVal(v,kpi);if(!hasMyUni)return fmtVal(v,kpi);return fmtVal(v,kpi)}},tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>i.dataset.label+": "+fmtVal(i.raw,kpi)}}},
             scales:{y:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:12},callback:yTick(kpi)}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:13,weight:600}}}}}});
-        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[data,kpi,avail]);
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[data,kpi,avail,myUniData,myUniName]);
     const note=avail?getDataNote(avail):null;
     return(<div style={{position:"relative"}}>{note&&<div className="chart-note">{note}</div>}<div style={{height:260}}><canvas ref={cRef}></canvas></div></div>);
 }
@@ -542,6 +552,26 @@ function IndexChart({uniData,natData,kpi,uniName,title,subtitle,avail}){
         return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniData,natData,kpi]);
     const note=avail?getDataNote(avail?.[kpi]):null;
     return(<div className="chart-panel"><div className="chart-title">{title}</div><div className="chart-subtitle">{subtitle}</div>{note&&<div className="chart-note">{note}</div>}<div className="chart-canvas-wrapper trend"><canvas ref={cRef}></canvas></div></div>);
+}
+
+// TrendChart — absolute value trend for My University
+function TrendChart({uniData,natData,kpi,uniName,avail}){
+    const cRef=useRef(null),inst=useRef(null);
+    useEffect(()=>{if(!cRef.current||!uniData||!kpi)return;if(inst.current)inst.current.destroy();
+        const uVals=uniData[kpi]||[];if(!uVals.length)return;
+        const a=avail?.[kpi];const uN=a?nullify(uVals,a):uVals;
+        const nVals=natData?.[kpi]||[];const nN=a?nullify(nVals,a):nVals;
+        const tc=getThemeColors();
+        const datasets=[{label:uniName,data:uN,borderColor:"#059669",backgroundColor:"rgba(5,150,105,.08)",borderWidth:3,fill:true,tension:0,spanGaps:false,pointRadius:6,pointHoverRadius:8,pointBackgroundColor:"#059669",pointBorderColor:tc.card,pointBorderWidth:3}];
+        if(nN.length){datasets.push({label:"全国平均",data:nN,borderColor:COMP_COLORS[1],backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:4,pointStyle:"triangle",pointBackgroundColor:COMP_COLORS[1],pointBorderColor:"transparent",fill:false})}
+        inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:13,family:"'Noto Sans JP'"},usePointStyle:true,padding:16,color:tc.text}},
+                datalabels:{display:true,align:"top",anchor:"end",color:tc.text,font:{size:12,weight:700,family:"'Outfit'"},formatter:(v,ctx)=>ctx.datasetIndex===0&&v!=null?fmtVal(v,kpi):""},
+                tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>fmtVal(i.raw,kpi)}}},
+            scales:{y:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:12},callback:yTick(kpi)}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:13,weight:600}}}}}});
+        return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniData,natData,kpi,avail]);
+    const note=avail?getDataNote(avail?.[kpi]):null;
+    return(<div className="chart-panel full anim-in"><div className="chart-title">推移</div><div className="chart-subtitle">{uniName} vs 全国平均</div>{note&&<div className="chart-note">{note}</div>}<div style={{height:280}}><canvas ref={cRef}></canvas></div></div>);
 }
 
 // StackedBar
@@ -568,13 +598,13 @@ function BulletGraph({contextData,kpi,title,subtitle,category}){
 }
 
 // CompactTable
-function CompactTable({universities,currentKpi,category,page,onPageChange,total}){
+function CompactTable({universities,currentKpi,category,page,onPageChange,total,myUniversityCode}){
     const[expanded,setExpanded]=useState(false);const[search,setSearch]=useState("");
     const filtered=search?universities.filter(u=>u.name.includes(search)):universities;const shown=expanded?filtered:filtered.slice(0,8);
     return(<div className="table-panel"><div className="table-toolbar"><div><div className="table-title">大学別データ — {kpiL(currentKpi,category)}</div><div className="table-count">{total.toLocaleString()} 機関</div></div>
         <input className="table-search" placeholder="テーブル内検索..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
         {shown.length===0?<div className="empty-state">該当データなし</div>:<><div className="table-scroll"><table><thead><tr><th style={{width:48}}>#</th><th>大学名</th><th>区分</th><th>都道府県</th>{YL.map((y,i)=><th key={i} className="numeric">{y}</th>)}</tr></thead>
-        <tbody>{shown.map((u,idx)=>{const vals=u.kpis?.[currentKpi]||[];return(<tr key={u.code||idx}><td style={{color:"var(--text-3)",fontWeight:600}}>{page*50+idx+1}</td><td style={{fontWeight:600}}>{u.name}</td><td>{u.type}</td><td>{u.prefecture}</td>{YL.map((_,i)=><td key={i} className="numeric">{fmtVal(vals[i]??null,currentKpi)}</td>)}</tr>)})}</tbody></table></div>
+        <tbody>{shown.map((u,idx)=>{const vals=u.kpis?.[currentKpi]||[];const isMy=myUniversityCode&&u.code===myUniversityCode;return(<tr key={u.code||idx} className={isMy?"myuni-highlight":""}><td style={{color:isMy?"#059669":"var(--text-3)",fontWeight:600}}>{page*50+idx+1}</td><td style={{fontWeight:600}}>{isMy?"★ ":""}{u.name}</td><td>{u.type}</td><td>{u.prefecture}</td>{YL.map((_,i)=><td key={i} className="numeric">{fmtVal(vals[i]??null,currentKpi)}</td>)}</tr>)})}</tbody></table></div>
         {!expanded&&filtered.length>8&&<div style={{textAlign:"center",padding:"14px 0"}}><button className="pagination-btn" onClick={()=>setExpanded(true)} style={{padding:"8px 28px",borderRadius:"var(--radius-md)"}}>さらに表示 ▼</button></div>}
         {expanded&&<div className="pagination"><button className="pagination-btn" disabled={page===0} onClick={()=>onPageChange(page-1)}>前へ</button><span className="pagination-info">{page*50+1}–{Math.min((page+1)*50,total)} / {total.toLocaleString()}</span><button className="pagination-btn" disabled={(page+1)*50>=total} onClick={()=>onPageChange(page+1)}>次へ</button></div>}</>}</div>);
 }
@@ -640,10 +670,11 @@ function LandingPage({onEnter,theme,onToggleTheme}){
 }
 
 // CategoryPage
-function CategoryPage({category,metadata,onSetMyUni}){
+function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
     const[selIdx,setSelIdx]=useState(0);const[natData,setNatData]=useState(null);const[btData,setBtData]=useState(null);
     const[rkData,setRkData]=useState([]);const[unis,setUnis]=useState([]);const[totalUnis,setTotalUnis]=useState(0);
     const[filters,setFilters]=useState({type:"",prefecture:""});const[page,setPage]=useState(0);const[loading,setLoading]=useState(true);
+    const[myUniData,setMyUniData]=useState(null);const[myUniRanks,setMyUniRanks]=useState(null);
     const kpis=CATEGORY_KPIS[category]||[];const selKpi=kpis[selIdx]||kpis[0];
     const isFiltered=!!(filters.type||filters.prefecture);const filterLabel=[filters.type,filters.prefecture].filter(Boolean).join(" / ")||"全大学";
     const avail=metadata?.data_availability;
@@ -651,7 +682,20 @@ function CategoryPage({category,metadata,onSetMyUni}){
     useEffect(()=>{if(!metadata)return;setLoading(true);api.national(kpis,filters.type||undefined,filters.prefecture||undefined).then(r=>setNatData(r.data||{})).catch(()=>{}).finally(()=>setLoading(false))},[category,metadata,filters]);
     useEffect(()=>{if(!metadata||!selKpi)return;const btP=filters.type?Promise.resolve(null):api.byType([selKpi]).then(r=>r.data||{}).catch(()=>null);const rkP=api.ranking(selKpi,metadata.years.length-1,10,filters.type||undefined,filters.prefecture||undefined).then(r=>r.ranking||[]).catch(()=>[]);Promise.all([btP,rkP]).then(([bt,rk])=>{setBtData(bt);setRkData(rk)})},[selKpi,metadata,filters]);
     useEffect(()=>{if(!metadata||!selKpi)return;api.universities({type:filters.type||undefined,prefecture:filters.prefecture||undefined,kpi:selKpi,sort:"desc",limit:50,offset:page*50}).then(d=>{setUnis(d.universities||[]);setTotalUnis(d.total_count||0)}).catch(()=>{})},[selKpi,filters,page,metadata]);
-    const cards=kpis.map((k,i)=>{const v=natData?.[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,category),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,dataNote:a?getDataNote(a):null,avail:a}});
+    useEffect(()=>{if(!myUniversity||!metadata){setMyUniData(null);setMyUniRanks(null);return}
+        Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,kpis,metadata.years.length-1)])
+        .then(([u,r])=>{setMyUniData(u);setMyUniRanks(r.ranks||{})}).catch(()=>{setMyUniData(null);setMyUniRanks(null)})},[myUniversity,category,metadata]);
+    const myUniKpis=myUniData?.kpis||{};
+    const cards=kpis.map((k,i)=>{const v=natData?.[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,category),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,dataNote:a?getDataNote(a):null,avail:a,
+        myUniValue:myUniversity?(myUniKpis[k]||[]).reduce((l,x)=>x!=null?x:l,null):null,myUniRank:myUniRanks?.[k]||null,myUniName:myUniversity?.name||null}});
+    // Prepare ranking data with myUniversity marker
+    const rkDataWithMyUni=useMemo(()=>{if(!myUniversity||!rkData.length)return rkData;
+        const inTop=rkData.some(d=>d.name===myUniversity.name);
+        const marked=rkData.map(d=>({...d,is_target:d.name===myUniversity.name}));
+        if(inTop)return marked;
+        const myVal=(myUniKpis[selKpi]||[])[metadata?.years?.length-1]??null;
+        if(myVal==null)return marked;
+        return[...marked,{name:"★ "+myUniversity.name,value:myVal,is_target:true,rank:myUniRanks?.[selKpi]?.rank||null}]},[rkData,myUniversity,myUniKpis,selKpi,myUniRanks,metadata]);
     if(loading&&!natData)return<div className="loading-state"><div className="spinner"></div></div>;
     return(<div>
         <div className="filter-bar">
@@ -666,13 +710,13 @@ function CategoryPage({category,metadata,onSetMyUni}){
                 <span className="detail-title">{kpiL(selKpi,category)}</span>
                 <span className="detail-meta">{filterLabel} — 詳細</span>
             </div>
-            <ExpandedLineChart data={natData} kpi={selKpi} avail={avail?.[selKpi]} filterLabel={filterLabel} category={category}/>
+            <ExpandedLineChart data={natData} kpi={selKpi} avail={avail?.[selKpi]} filterLabel={filterLabel} category={category} myUniData={myUniversity?myUniKpis:null} myUniName={myUniversity?.name}/>
             <div className="charts-row" style={{marginTop:20,marginBottom:0}}>
                 {btData?<StackedBar byTypeData={btData} kpi={selKpi} title="設置区分別 構成比" subtitle={filterLabel}/>:<div className="chart-panel"><div className="empty-state">設置区分フィルター適用中</div></div>}
-                {rkData.length>0?<BulletGraph contextData={rkData} kpi={selKpi} title="大学ランキング TOP 10" subtitle={`R6 / ${filterLabel}`} category={category}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
+                {rkDataWithMyUni.length>0?<BulletGraph contextData={rkDataWithMyUni} kpi={selKpi} title="大学ランキング TOP 10" subtitle={`R6 / ${filterLabel}`} category={category}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
             </div>
         </div>
-        <CompactTable universities={unis} currentKpi={selKpi} category={category} page={page} onPageChange={setPage} total={totalUnis}/>
+        <CompactTable universities={unis} currentKpi={selKpi} category={category} page={page} onPageChange={setPage} total={totalUnis} myUniversityCode={myUniversity?.code}/>
     </div>);
 }
 
@@ -745,10 +789,13 @@ function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
                     return<tr key={i} style={!hasData?{opacity:.4}:{}}><td>{y}{!hasData?" (調査なし)":""}</td><td className="numeric">{hasData?fmtVal(uv,selKpi):"-"}</td><td className="numeric">{hasData?fmtVal(nv,selKpi):"-"}</td><td className="numeric">{hasData&&ranks?.[selKpi]?`${ranks[selKpi].rank}位/${ranks[selKpi].total}`:"-"}</td></tr>})}</tbody></table></div></div>
                 :
                 /* 通常データ: チャート形式 */
+                <>
+                <TrendChart uniData={uniKpis} natData={natData} kpi={selKpi} uniName={myUniversity.name} avail={avail}/>
                 <div className="charts-row">
                     <IndexChart uniData={uniKpis} natData={natData} kpi={selKpi} uniName={myUniversity.name} title="変化率推移" subtitle={`${myUniversity.name} vs 全国（基準年=100%）`} avail={avail}/>
                     {ctx&&ctx.context?<BulletGraph contextData={ctx.context} kpi={selKpi} title="全国順位 前後±5" subtitle={`${ctx.target?.rank}位/${ctx.total_ranked}機関`}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
-                </div>}
+                </div>
+                </>}
             </div>
         </>}
     </div>);
@@ -923,7 +970,7 @@ function App(){
             <div className="print-header">{myUniversity?`${myUniversity.name} — 産連調査Viewer`:"産連調査Viewer"} ({new Date().toLocaleDateString("ja-JP")})</div>
             <CommandPalette open={cmdOpen} onClose={()=>setCmdOpen(false)} onNavigate={setCurrentPage} onSetMyUni={handleSetMyUni} metadata={metadata}/>
             <div className="content">{error&&<div className="error-banner">{error}</div>}
-                {currentPage.type==="category"&&<CategoryPage key={currentPage.id} category={currentPage.id} metadata={metadata} onSetMyUni={handleSetMyUni}/>}
+                {currentPage.type==="category"&&<CategoryPage key={currentPage.id} category={currentPage.id} metadata={metadata} onSetMyUni={handleSetMyUni} myUniversity={myUniversity}/>}
                 {currentPage.type==="my-university"&&<MyUniversityPage myUniversity={myUniversity} metadata={metadata} onSetMyUni={handleSetMyUni} onClear={handleClearMyUni}/>}
                 {currentPage.type==="comparison"&&<ComparisonPage myUniversity={myUniversity} metadata={metadata}/>}
                 {currentPage.type==="ip-funnel"&&<IPFunnelPage myUniversity={myUniversity} metadata={metadata}/>}
