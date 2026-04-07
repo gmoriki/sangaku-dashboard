@@ -555,7 +555,7 @@ function IndexChart({uniData,natData,kpi,uniName,title,subtitle,avail}){
 }
 
 // TrendChart — absolute value trend for My University
-function TrendChart({uniData,natData,kpi,uniName,avail}){
+function TrendChart({uniData,natData,kpi,uniName,avail,title,subtitle,natLabel,compact}){
     const cRef=useRef(null),inst=useRef(null);
     useEffect(()=>{if(!cRef.current||!uniData||!kpi)return;if(inst.current)inst.current.destroy();
         const uVals=uniData[kpi]||[];if(!uVals.length)return;
@@ -563,15 +563,15 @@ function TrendChart({uniData,natData,kpi,uniName,avail}){
         const nVals=natData?.[kpi]||[];const nN=a?nullify(nVals,a):nVals;
         const tc=getThemeColors();
         const datasets=[{label:uniName,data:uN,borderColor:"#059669",backgroundColor:"rgba(5,150,105,.08)",borderWidth:3,fill:true,tension:0,spanGaps:false,pointRadius:6,pointHoverRadius:8,pointBackgroundColor:"#059669",pointBorderColor:tc.card,pointBorderWidth:3}];
-        if(nN.length){datasets.push({label:"全国平均",data:nN,borderColor:COMP_COLORS[1],backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:4,pointStyle:"triangle",pointBackgroundColor:COMP_COLORS[1],pointBorderColor:"transparent",fill:false})}
+        if(nN.length){datasets.push({label:natLabel||"全国平均",data:nN,borderColor:COMP_COLORS[1],backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],tension:0,spanGaps:false,pointRadius:4,pointStyle:"triangle",pointBackgroundColor:COMP_COLORS[1],pointBorderColor:"transparent",fill:false})}
         inst.current=new Chart(cRef.current.getContext("2d"),{type:"line",data:{labels:YL,datasets},
             options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:13,family:"'Noto Sans JP'"},usePointStyle:true,padding:16,color:tc.text}},
                 datalabels:{display:true,align:"top",anchor:"end",color:tc.text,font:{size:12,weight:700,family:"'Outfit'"},formatter:(v,ctx)=>ctx.datasetIndex===0&&v!=null?fmtVal(v,kpi):""},
-                tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>fmtVal(i.raw,kpi)}}},
+                tooltip:{callbacks:{title:i=>YLL[i[0].dataIndex],label:i=>`${i.dataset.label}: ${fmtVal(i.raw,kpi)}`}}},
             scales:{y:{beginAtZero:true,border:{display:false},grid:{color:tc.grid},ticks:{color:tc.text,font:{size:12},callback:yTick(kpi)}},x:{border:{display:false},grid:{display:false},ticks:{color:tc.text,font:{size:13,weight:600}}}}}});
         return()=>{if(inst.current){inst.current.destroy();inst.current=null}}},[uniData,natData,kpi,avail]);
     const note=avail?getDataNote(avail?.[kpi]):null;
-    return(<div className="chart-panel full anim-in"><div className="chart-title">推移</div><div className="chart-subtitle">{uniName} vs 全国平均</div>{note&&<div className="chart-note">{note}</div>}<div style={{height:280}}><canvas ref={cRef}></canvas></div></div>);
+    return(<div className={compact?"chart-panel":"chart-panel full anim-in"}><div className="chart-title">{title||"推移"}</div><div className="chart-subtitle">{subtitle||`${uniName} vs 全国平均`}</div>{note&&<div className="chart-note">{note}</div>}<div style={{height:compact?240:280}}><canvas ref={cRef}></canvas></div></div>);
 }
 
 // StackedBar
@@ -674,7 +674,7 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
     const[selIdx,setSelIdx]=useState(0);const[natData,setNatData]=useState(null);const[btData,setBtData]=useState(null);
     const[rkData,setRkData]=useState([]);const[unis,setUnis]=useState([]);const[totalUnis,setTotalUnis]=useState(0);
     const[filters,setFilters]=useState({type:"",prefecture:""});const[page,setPage]=useState(0);const[loading,setLoading]=useState(true);
-    const[myUniData,setMyUniData]=useState(null);const[myUniRanks,setMyUniRanks]=useState(null);const[myUniCtx,setMyUniCtx]=useState(null);
+    const[myUniData,setMyUniData]=useState(null);const[myUniRanks,setMyUniRanks]=useState(null);const[myUniCtx,setMyUniCtx]=useState(null);const[natAvgData,setNatAvgData]=useState(null);
     const kpis=CATEGORY_KPIS[category]||[];const selKpi=kpis[selIdx]||kpis[0];
     const isFiltered=!!(filters.type||filters.prefecture);const filterLabel=[filters.type,filters.prefecture].filter(Boolean).join(" / ")||"全大学";
     const avail=metadata?.data_availability;
@@ -682,9 +682,9 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
     useEffect(()=>{if(!metadata)return;setLoading(true);api.national(kpis,filters.type||undefined,filters.prefecture||undefined).then(r=>setNatData(r.data||{})).catch(()=>{}).finally(()=>setLoading(false))},[category,metadata,filters]);
     useEffect(()=>{if(!metadata||!selKpi)return;const btP=filters.type?Promise.resolve(null):api.byType([selKpi]).then(r=>r.data||{}).catch(()=>null);const rkP=api.ranking(selKpi,metadata.years.length-1,10,filters.type||undefined,filters.prefecture||undefined).then(r=>r.ranking||[]).catch(()=>[]);Promise.all([btP,rkP]).then(([bt,rk])=>{setBtData(bt);setRkData(rk)})},[selKpi,metadata,filters]);
     useEffect(()=>{if(!metadata||!selKpi)return;api.universities({type:filters.type||undefined,prefecture:filters.prefecture||undefined,kpi:selKpi,sort:"desc",limit:50,offset:page*50}).then(d=>{setUnis(d.universities||[]);setTotalUnis(d.total_count||0)}).catch(()=>{})},[selKpi,filters,page,metadata]);
-    useEffect(()=>{if(!myUniversity||!metadata){setMyUniData(null);setMyUniRanks(null);return}
-        Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,kpis,metadata.years.length-1)])
-        .then(([u,r])=>{setMyUniData(u);setMyUniRanks(r.ranks||{})}).catch(()=>{setMyUniData(null);setMyUniRanks(null)})},[myUniversity,category,metadata]);
+    useEffect(()=>{if(!myUniversity||!metadata){setMyUniData(null);setMyUniRanks(null);setNatAvgData(null);return}
+        Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,kpis,metadata.years.length-1),api.national(kpis,filters.type||undefined,filters.prefecture||undefined,'avg')])
+        .then(([u,r,a])=>{setMyUniData(u);setMyUniRanks(r.ranks||{});setNatAvgData(a.data||{})}).catch(()=>{setMyUniData(null);setMyUniRanks(null);setNatAvgData(null)})},[myUniversity,category,metadata,filters]);
     useEffect(()=>{if(!myUniversity||!metadata||!selKpi){setMyUniCtx(null);return}
         api.rankingContext(selKpi,myUniversity.code,metadata.years.length-1,5).then(setMyUniCtx).catch(()=>setMyUniCtx(null))},[selKpi,myUniversity,metadata]);
     const myUniKpis=myUniData?.kpis||{};
@@ -712,20 +712,23 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
                 <span className="detail-title">{kpiL(selKpi,category)}</span>
                 <span className="detail-meta">{filterLabel} — 詳細</span>
             </div>
-            <ExpandedLineChart data={natData} kpi={selKpi} avail={avail?.[selKpi]} filterLabel={filterLabel} category={category} myUniData={myUniversity?myUniKpis:null} myUniName={myUniversity?.name}/>
-            <div className="charts-row" style={{marginTop:20,marginBottom:myUniCtx&&myUniCtx.context?20:0}}>
+            <ExpandedLineChart data={natData} kpi={selKpi} avail={avail?.[selKpi]} filterLabel={filterLabel} category={category}/>
+            <div className="charts-row" style={{marginTop:20,marginBottom:0}}>
                 {btData?<StackedBar byTypeData={btData} kpi={selKpi} title="設置区分別 構成比" subtitle={filterLabel}/>:<div className="chart-panel"><div className="empty-state">設置区分フィルター適用中</div></div>}
                 {rkDataWithMyUni.length>0?<BulletGraph contextData={rkDataWithMyUni} kpi={selKpi} title="大学ランキング TOP 10" subtitle={`R6 / ${filterLabel}`} category={category}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
             </div>
-            {myUniCtx&&myUniCtx.context&&<div className="charts-row" style={{marginBottom:0}}>
-                <BulletGraph contextData={myUniCtx.context} kpi={selKpi} title={`★ ${myUniversity.name} の位置`} subtitle={`${myUniCtx.target?.rank}位/${myUniCtx.total_ranked}機関 — 前後±5`} category={category}/>
-                <div className="chart-panel" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:12}}>
-                    <div style={{fontSize:48,fontFamily:"var(--font-display)",fontWeight:800,color:"#059669"}}>{myUniCtx.target?.rank}<span style={{fontSize:20,fontWeight:500,color:"var(--text-2)"}}>位</span></div>
-                    <div style={{fontSize:14,color:"var(--text-2)"}}>/ {myUniCtx.total_ranked}機関中</div>
-                    <div className="pbar" style={{width:"80%",justifyContent:"center"}}>{[...Array(10)].map((_,i)=>{const pct=1-myUniCtx.target.rank/myUniCtx.total_ranked;const filled=i<Math.round(pct*10);const isTop=pct>=0.8;return<span key={i} className={`pbar-dot ${filled?"filled":""} ${filled&&isTop?"top":""}`}/>})}<span className="pbar-label">上位{Math.round((myUniCtx.target.rank/myUniCtx.total_ranked)*100)}%</span></div>
-                </div>
-            </div>}
         </div>
+        {myUniversity&&myUniData&&<div className="detail-panel anim-in" style={{borderTopColor:"#059669"}}>
+            <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:20}}>
+                <span className="detail-title" style={{color:"#059669"}}>★ {myUniversity.name} のフォーカス</span>
+                <span className="detail-meta">{kpiL(selKpi,category)}</span>
+                {myUniRanks?.[selKpi]&&<span style={{fontSize:13,color:"#059669",fontWeight:600,marginLeft:"auto"}}>{myUniRanks[selKpi].rank}位 / {myUniRanks[selKpi].total}機関（上位{Math.round((myUniRanks[selKpi].rank/myUniRanks[selKpi].total)*100)}%）</span>}
+            </div>
+            <div className="charts-row">
+                <TrendChart uniData={myUniKpis} natData={natAvgData} kpi={selKpi} uniName={myUniversity.name} avail={avail} title="推移（vs 全国平均）" subtitle={`${myUniversity.name} と1大学あたり平均の比較`} natLabel="全国平均（1大学あたり）" compact={true}/>
+                {myUniCtx&&myUniCtx.context?<BulletGraph contextData={myUniCtx.context} kpi={selKpi} title="全国順位 前後±5" subtitle={`${myUniCtx.target?.rank}位/${myUniCtx.total_ranked}機関`} category={category}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
+            </div>
+        </div>}
         <CompactTable universities={unis} currentKpi={selKpi} category={category} page={page} onPageChange={setPage} total={totalUnis} myUniversityCode={myUniversity?.code}/>
     </div>);
 }
