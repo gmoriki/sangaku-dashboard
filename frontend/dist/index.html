@@ -674,7 +674,7 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
     const[selIdx,setSelIdx]=useState(0);const[natData,setNatData]=useState(null);const[btData,setBtData]=useState(null);
     const[rkData,setRkData]=useState([]);const[unis,setUnis]=useState([]);const[totalUnis,setTotalUnis]=useState(0);
     const[filters,setFilters]=useState({type:"",prefecture:""});const[page,setPage]=useState(0);const[loading,setLoading]=useState(true);
-    const[myUniData,setMyUniData]=useState(null);const[myUniRanks,setMyUniRanks]=useState(null);
+    const[myUniData,setMyUniData]=useState(null);const[myUniRanks,setMyUniRanks]=useState(null);const[myUniCtx,setMyUniCtx]=useState(null);
     const kpis=CATEGORY_KPIS[category]||[];const selKpi=kpis[selIdx]||kpis[0];
     const isFiltered=!!(filters.type||filters.prefecture);const filterLabel=[filters.type,filters.prefecture].filter(Boolean).join(" / ")||"全大学";
     const avail=metadata?.data_availability;
@@ -685,6 +685,8 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
     useEffect(()=>{if(!myUniversity||!metadata){setMyUniData(null);setMyUniRanks(null);return}
         Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,kpis,metadata.years.length-1)])
         .then(([u,r])=>{setMyUniData(u);setMyUniRanks(r.ranks||{})}).catch(()=>{setMyUniData(null);setMyUniRanks(null)})},[myUniversity,category,metadata]);
+    useEffect(()=>{if(!myUniversity||!metadata||!selKpi){setMyUniCtx(null);return}
+        api.rankingContext(selKpi,myUniversity.code,metadata.years.length-1,5).then(setMyUniCtx).catch(()=>setMyUniCtx(null))},[selKpi,myUniversity,metadata]);
     const myUniKpis=myUniData?.kpis||{};
     const cards=kpis.map((k,i)=>{const v=natData?.[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,category),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,dataNote:a?getDataNote(a):null,avail:a,
         myUniValue:myUniversity?(myUniKpis[k]||[]).reduce((l,x)=>x!=null?x:l,null):null,myUniRank:myUniRanks?.[k]||null,myUniName:myUniversity?.name||null}});
@@ -711,10 +713,18 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
                 <span className="detail-meta">{filterLabel} — 詳細</span>
             </div>
             <ExpandedLineChart data={natData} kpi={selKpi} avail={avail?.[selKpi]} filterLabel={filterLabel} category={category} myUniData={myUniversity?myUniKpis:null} myUniName={myUniversity?.name}/>
-            <div className="charts-row" style={{marginTop:20,marginBottom:0}}>
+            <div className="charts-row" style={{marginTop:20,marginBottom:myUniCtx&&myUniCtx.context?20:0}}>
                 {btData?<StackedBar byTypeData={btData} kpi={selKpi} title="設置区分別 構成比" subtitle={filterLabel}/>:<div className="chart-panel"><div className="empty-state">設置区分フィルター適用中</div></div>}
                 {rkDataWithMyUni.length>0?<BulletGraph contextData={rkDataWithMyUni} kpi={selKpi} title="大学ランキング TOP 10" subtitle={`R6 / ${filterLabel}`} category={category}/>:<div className="chart-panel"><div className="empty-state">ランキングデータなし</div></div>}
             </div>
+            {myUniCtx&&myUniCtx.context&&<div className="charts-row" style={{marginBottom:0}}>
+                <BulletGraph contextData={myUniCtx.context} kpi={selKpi} title={`★ ${myUniversity.name} の位置`} subtitle={`${myUniCtx.target?.rank}位/${myUniCtx.total_ranked}機関 — 前後±5`} category={category}/>
+                <div className="chart-panel" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:12}}>
+                    <div style={{fontSize:48,fontFamily:"var(--font-display)",fontWeight:800,color:"#059669"}}>{myUniCtx.target?.rank}<span style={{fontSize:20,fontWeight:500,color:"var(--text-2)"}}>位</span></div>
+                    <div style={{fontSize:14,color:"var(--text-2)"}}>/ {myUniCtx.total_ranked}機関中</div>
+                    <div className="pbar" style={{width:"80%",justifyContent:"center"}}>{[...Array(10)].map((_,i)=>{const pct=1-myUniCtx.target.rank/myUniCtx.total_ranked;const filled=i<Math.round(pct*10);const isTop=pct>=0.8;return<span key={i} className={`pbar-dot ${filled?"filled":""} ${filled&&isTop?"top":""}`}/>})}<span className="pbar-label">上位{Math.round((myUniCtx.target.rank/myUniCtx.total_ranked)*100)}%</span></div>
+                </div>
+            </div>}
         </div>
         <CompactTable universities={unis} currentKpi={selKpi} category={category} page={page} onPageChange={setPage} total={totalUnis} myUniversityCode={myUniversity?.code}/>
     </div>);
