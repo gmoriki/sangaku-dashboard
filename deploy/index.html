@@ -235,6 +235,16 @@
         .table-search{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;font-family:var(--font-body);width:220px;background:var(--input-bg);color:var(--text);transition:border .15s}
         .table-search:focus{outline:none;border-color:var(--primary-600);box-shadow:0 0 0 3px var(--primary-50)}
         .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .table-scroll th:nth-child(1),.table-scroll td:nth-child(1){position:sticky;left:0;z-index:2;background:var(--card)}
+        .table-scroll th:nth-child(2),.table-scroll td:nth-child(2){position:sticky;left:48px;z-index:2;background:var(--card)}
+        .table-scroll thead th:nth-child(1),.table-scroll thead th:nth-child(2){z-index:3;background:var(--border-2)}
+        .myuni-highlight td:nth-child(1),.myuni-highlight td:nth-child(2){background:rgba(5,150,105,.06)}
+        [data-theme="dark"] .myuni-highlight td:nth-child(1),[data-theme="dark"] .myuni-highlight td:nth-child(2){background:rgba(5,150,105,.12)}
+        tbody tr:hover td:nth-child(1),tbody tr:hover td:nth-child(2){background:var(--primary-50)}
+        .myuni-promo{background:linear-gradient(135deg,rgba(5,150,105,.08),rgba(37,99,235,.08));border:1px solid rgba(5,150,105,.2);border-radius:var(--radius-md);padding:12px 20px;display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:14px;color:var(--text)}
+        .myuni-promo button{padding:6px 16px;border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-body);cursor:pointer;border:none;font-weight:600}
+        .myuni-promo .promo-cta{background:#059669;color:#fff}.myuni-promo .promo-cta:hover{background:#047857}
+        .myuni-promo .promo-close{background:transparent;color:var(--text-3);font-size:16px;padding:4px 8px;margin-left:auto}
         table{width:100%;border-collapse:collapse;font-size:14px;min-width:700px}
         thead{background:var(--border-2)}
         thead th{text-align:left;padding:12px 16px;font-size:11px;font-weight:700;color:var(--text-2);border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
@@ -700,18 +710,20 @@ function LandingPage({onEnter,theme,onToggleTheme,onTermsOpen}){
 }
 
 // CategoryPage
-function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
+function CategoryPage({category,metadata,onSetMyUni,myUniversity,onNavigate}){
     const[selIdx,setSelIdx]=useState(0);const[natData,setNatData]=useState(null);const[btData,setBtData]=useState(null);
     const[rkData,setRkData]=useState([]);const[unis,setUnis]=useState([]);const[totalUnis,setTotalUnis]=useState(0);
+    const[fetchError,setFetchError]=useState(null);const[retryKey,setRetryKey]=useState(0);
+    const[promoDismissed,setPromoDismissed]=useState(()=>sessionStorage.getItem("myuni_promo_dismissed")==="1");
     const[filters,setFilters]=useState({type:"",prefecture:""});const[page,setPage]=useState(0);const[loading,setLoading]=useState(true);
     const[myUniData,setMyUniData]=useState(null);const[myUniRanks,setMyUniRanks]=useState(null);const[myUniCtx,setMyUniCtx]=useState(null);const[natAvgData,setNatAvgData]=useState(null);
     const kpis=CATEGORY_KPIS[category]||[];const selKpi=kpis[selIdx]||kpis[0];
     const isFiltered=!!(filters.type||filters.prefecture);const filterLabel=[filters.type,filters.prefecture].filter(Boolean).join(" / ")||"全大学";
     const avail=metadata?.data_availability;
     useEffect(()=>{setSelIdx(0);setPage(0)},[category]);
-    useEffect(()=>{if(!metadata)return;setLoading(true);api.national(kpis,filters.type||undefined,filters.prefecture||undefined).then(r=>setNatData(r.data||{})).catch(()=>{}).finally(()=>setLoading(false))},[category,metadata,filters]);
-    useEffect(()=>{if(!metadata||!selKpi)return;const btP=filters.type?Promise.resolve(null):api.byType([selKpi]).then(r=>r.data||{}).catch(()=>null);const rkP=api.ranking(selKpi,metadata.years.length-1,10,filters.type||undefined,filters.prefecture||undefined).then(r=>r.ranking||[]).catch(()=>[]);Promise.all([btP,rkP]).then(([bt,rk])=>{setBtData(bt);setRkData(rk)})},[selKpi,metadata,filters]);
-    useEffect(()=>{if(!metadata||!selKpi)return;api.universities({type:filters.type||undefined,prefecture:filters.prefecture||undefined,kpi:selKpi,sort:"desc",limit:50,offset:page*50}).then(d=>{setUnis(d.universities||[]);setTotalUnis(d.total_count||0)}).catch(()=>{})},[selKpi,filters,page,metadata]);
+    useEffect(()=>{if(!metadata)return;setLoading(true);setFetchError(null);api.national(kpis,filters.type||undefined,filters.prefecture||undefined).then(r=>setNatData(r.data||{})).catch(()=>setFetchError("データの取得に失敗しました")).finally(()=>setLoading(false))},[category,metadata,filters,retryKey]);
+    useEffect(()=>{if(!metadata||!selKpi)return;const btP=filters.type?Promise.resolve(null):api.byType([selKpi]).then(r=>r.data||{}).catch(()=>null);const rkP=api.ranking(selKpi,metadata.years.length-1,10,filters.type||undefined,filters.prefecture||undefined).then(r=>r.ranking||[]).catch(()=>[]);Promise.all([btP,rkP]).then(([bt,rk])=>{setBtData(bt);setRkData(rk)})},[selKpi,metadata,filters,retryKey]);
+    useEffect(()=>{if(!metadata||!selKpi)return;api.universities({type:filters.type||undefined,prefecture:filters.prefecture||undefined,kpi:selKpi,sort:"desc",limit:50,offset:page*50}).then(d=>{setUnis(d.universities||[]);setTotalUnis(d.total_count||0)}).catch(()=>setFetchError("データの取得に失敗しました"))},[selKpi,filters,page,metadata,retryKey]);
     useEffect(()=>{if(!myUniversity||!metadata){setMyUniData(null);setMyUniRanks(null);setNatAvgData(null);return}
         Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,kpis,metadata.years.length-1),api.national(kpis,filters.type||undefined,filters.prefecture||undefined,'avg')])
         .then(([u,r,a])=>{setMyUniData(u);setMyUniRanks(r.ranks||{});setNatAvgData(a.data||{})}).catch(()=>{setMyUniData(null);setMyUniRanks(null);setNatAvgData(null)})},[myUniversity,category,metadata,filters]);
@@ -728,8 +740,11 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
         const myVal=(myUniKpis[selKpi]||[])[metadata?.years?.length-1]??null;
         if(myVal==null)return marked;
         return[...marked,{name:"★ "+myUniversity.name,value:myVal,is_target:true,rank:myUniRanks?.[selKpi]?.rank||null}]},[rkData,myUniversity,myUniKpis,selKpi,myUniRanks,metadata]);
+    const dismissPromo=()=>{setPromoDismissed(true);sessionStorage.setItem("myuni_promo_dismissed","1")};
     if(loading&&!natData)return<div className="loading-state"><div className="spinner"></div></div>;
     return(<div>
+        {fetchError&&<div className="error-banner">{fetchError} <span onClick={()=>setRetryKey(k=>k+1)} style={{cursor:"pointer",textDecoration:"underline",marginLeft:8}}>再読み込み</span></div>}
+        {!myUniversity&&!promoDismissed&&<div className="myuni-promo anim-in"><span>★ マイ大学を設定すると、全国順位や推移比較が表示されます</span><button className="promo-cta" onClick={()=>onNavigate&&onNavigate({type:"my-university",id:null})}>設定する</button><button className="promo-close" onClick={dismissPromo}>✕</button></div>}
         <div className="filter-bar">
             <div className="filter-group"><label className="filter-label">設置区分</label><select className="filter-select" value={filters.type||""} onChange={e=>{setFilters({...filters,type:e.target.value});setPage(0)}}><option value="">すべて</option>{["国立","公立","私立"].map(t=><option key={t} value={t}>{t}</option>)}</select></div>
             <div className="filter-group"><label className="filter-label">都道府県</label><select className="filter-select" value={filters.prefecture||""} onChange={e=>{setFilters({...filters,prefecture:e.target.value});setPage(0)}}><option value="">すべて</option>{(metadata?.prefectures||[]).map(p=><option key={p} value={p}>{p}</option>)}</select></div>
@@ -765,14 +780,15 @@ function CategoryPage({category,metadata,onSetMyUni,myUniversity}){
 
 // P0-1: Executive Summary
 function ExecutiveSummary({myUniversity,metadata}){
-    const[uniData,setUniData]=useState(null);const[allRanks,setAllRanks]=useState(null);const[loading,setLoading]=useState(true);
+    const[uniData,setUniData]=useState(null);const[allRanks,setAllRanks]=useState(null);const[loading,setLoading]=useState(true);const[fetchError,setFetchError]=useState(null);const[retryKey,setRetryKey]=useState(0);
     const primaryKpis=SIDEBAR_ITEMS.filter(s=>s!=="概要").map(s=>(CATEGORY_KPIS[s]||[])[0]).filter(Boolean);
 
-    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);
+    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);setFetchError(null);
         Promise.all([api.university(myUniversity.code),api.universityRanks(myUniversity.code,primaryKpis,metadata.years.length-1)])
-        .then(([u,r])=>{setUniData(u);setAllRanks(r.ranks||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,metadata]);
+        .then(([u,r])=>{setUniData(u);setAllRanks(r.ranks||{})}).catch(()=>setFetchError("データの取得に失敗しました")).finally(()=>setLoading(false))},[myUniversity,metadata,retryKey]);
 
     if(loading)return<div className="loading-state"><div className="spinner"></div></div>;
+    if(fetchError)return<div className="error-banner">{fetchError} <span onClick={()=>setRetryKey(k=>k+1)} style={{cursor:"pointer",textDecoration:"underline",marginLeft:8}}>再読み込み</span></div>;
     const uniKpis=uniData?.kpis||{};
     // Determine strengths and cautions
     const items=SIDEBAR_ITEMS.filter(s=>s!=="概要").map(cat=>{const kpi=(CATEGORY_KPIS[cat]||[])[0];if(!kpi)return null;const vals=uniKpis[kpi]||[];const avail=metadata?.data_availability?.[kpi];const dv=avail?nullify(vals,avail):vals;const latest=dv.reduce((l,x)=>x!=null?x:l,null);const change=calcChg(vals,avail);const rank=allRanks?.[kpi];const pct=rank?(1-rank.rank/rank.total):0;return{cat,kpi,latest,change,rank,pct}}).filter(Boolean);
@@ -803,17 +819,18 @@ function ExecutiveSummary({myUniversity,metadata}){
 // MyUniversityPage
 function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
     const[cat,setCat]=useState("サマリー");const[selIdx,setSelIdx]=useState(0);
-    const[uniData,setUniData]=useState(null);const[natData,setNatData]=useState(null);const[ranks,setRanks]=useState(null);const[ctx,setCtx]=useState(null);const[loading,setLoading]=useState(true);
+    const[uniData,setUniData]=useState(null);const[natData,setNatData]=useState(null);const[ranks,setRanks]=useState(null);const[ctx,setCtx]=useState(null);const[loading,setLoading]=useState(true);const[fetchError,setFetchError]=useState(null);const[retryKey,setRetryKey]=useState(0);
     const kpis=CATEGORY_KPIS[cat]||[];const selKpi=kpis[selIdx]||kpis[0];const avail=metadata?.data_availability;
     useEffect(()=>{setSelIdx(0)},[cat]);
-    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);const k=CATEGORY_KPIS[cat]||[];
+    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);setFetchError(null);const k=CATEGORY_KPIS[cat]||[];
         Promise.all([api.university(myUniversity.code),api.national(k,null,null,'avg'),api.universityRanks(myUniversity.code,k,metadata.years.length-1)])
-        .then(([u,n,r])=>{setUniData(u);setNatData(n.data||{});setRanks(r.ranks||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,cat,metadata]);
+        .then(([u,n,r])=>{setUniData(u);setNatData(n.data||{});setRanks(r.ranks||{})}).catch(()=>setFetchError("データの取得に失敗しました")).finally(()=>setLoading(false))},[myUniversity,cat,metadata,retryKey]);
     useEffect(()=>{if(!myUniversity||!metadata||!selKpi)return;api.rankingContext(selKpi,myUniversity.code,metadata.years.length-1,5).then(setCtx).catch(()=>setCtx(null))},[selKpi,myUniversity,metadata]);
     if(!myUniversity)return(<div className="setup-box"><h2>マイ大学を設定</h2><p>大学を検索して設定すると、専用ダッシュボードが利用できます。</p><SmartSearch onSetMyUni={onSetMyUni} showMyUniBtn={true} placeholder="大学名で検索..." showSuggestions={true}/></div>);
     const uniKpis=uniData?.kpis||{};
     const cards=kpis.map((k,i)=>{const v=uniKpis[k]||[];const a=avail?.[k];const dv=a?nullify(v,a):v;return{kpi:k,label:kpiL(k,cat),value:dv.reduce((l,x)=>x!=null?x:l,null),change:calcChg(v,a),sparkData:dv,rank:ranks?.[k]||null,dataNote:a?getDataNote(a):null,avail:a}});
     return(<div>
+        {fetchError&&<div className="error-banner">{fetchError} <span onClick={()=>setRetryKey(k=>k+1)} style={{cursor:"pointer",textDecoration:"underline",marginLeft:8}}>再読み込み</span></div>}
         <div className="uni-banner anim-in"><div style={{display:"flex",alignItems:"baseline"}}><div className="uni-banner-name">{myUniversity.name}</div><div className="uni-banner-meta">{myUniversity.type} / {myUniversity.prefecture}</div></div><button className="btn-sm danger" onClick={onClear}>クリア</button></div>
         <div className="category-tabs"><div className={`cat-tab ${cat==="サマリー"?"active":""}`} onClick={()=>setCat("サマリー")} style={cat==="サマリー"?{background:"var(--primary-900)",color:"#fff"}:{}}>📊 サマリー</div>{SIDEBAR_ITEMS.map(s=><div key={s} className={`cat-tab ${cat===s?"active":""}`} onClick={()=>setCat(s)}>{s}</div>)}</div>
         {cat==="サマリー"?<ExecutiveSummary myUniversity={myUniversity} metadata={metadata}/>:
@@ -848,13 +865,14 @@ function MyUniversityPage({myUniversity,metadata,onSetMyUni,onClear}){
 const IP_FUNNEL=[{label:"発明届出",kpi:"発明届出件数"},{label:"特許出願",kpi:"特許出願_国内"},{label:"特許保有",kpi:"特許保有_国内"},{label:"許諾中",kpi:"特許保有_国内_実施許諾中"},{label:"許諾権利数",kpi:"実施許諾_国内_権利数"},{label:"許諾収入",kpi:"実施許諾収入_国内"}];
 
 function IPFunnelPage({myUniversity,metadata}){
-    const[uniData,setUniData]=useState(null);const[natData,setNatData]=useState(null);const[loading,setLoading]=useState(true);
-    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);
+    const[uniData,setUniData]=useState(null);const[natData,setNatData]=useState(null);const[loading,setLoading]=useState(true);const[fetchError,setFetchError]=useState(null);const[retryKey,setRetryKey]=useState(0);
+    useEffect(()=>{if(!myUniversity||!metadata)return;setLoading(true);setFetchError(null);
         const kpis=IP_FUNNEL.map(f=>f.kpi);
         Promise.all([api.university(myUniversity.code),api.national(kpis)])
-        .then(([u,n])=>{setUniData(u);setNatData(n.data||{})}).catch(()=>{}).finally(()=>setLoading(false))},[myUniversity,metadata]);
+        .then(([u,n])=>{setUniData(u);setNatData(n.data||{})}).catch(()=>setFetchError("データの取得に失敗しました")).finally(()=>setLoading(false))},[myUniversity,metadata,retryKey]);
 
     if(!myUniversity)return<div className="empty-state">マイ大学を設定すると知財パイプラインが表示されます</div>;
+    if(fetchError)return<div className="error-banner">{fetchError} <span onClick={()=>setRetryKey(k=>k+1)} style={{cursor:"pointer",textDecoration:"underline",marginLeft:8}}>再読み込み</span></div>;
     if(loading)return<div className="loading-state"><div className="spinner"></div></div>;
     const uk=uniData?.kpis||{};const yi=6;
     const items=IP_FUNNEL.map((f,i)=>{const v=(uk[f.kpi]||[])[yi];const nv=(natData[f.kpi]||[])[yi];return{...f,value:v,natValue:nv}});
@@ -1013,7 +1031,7 @@ function App(){
             <div className="print-header">{myUniversity?`${myUniversity.name} — 産連調査Viewer`:"産連調査Viewer"} ({new Date().toLocaleDateString("ja-JP")})</div>
             <CommandPalette open={cmdOpen} onClose={()=>setCmdOpen(false)} onNavigate={setCurrentPage} onSetMyUni={handleSetMyUni} metadata={metadata}/>
             <div className="content">{error&&<div className="error-banner">{error}</div>}
-                {currentPage.type==="category"&&<CategoryPage key={currentPage.id} category={currentPage.id} metadata={metadata} onSetMyUni={handleSetMyUni} myUniversity={myUniversity}/>}
+                {currentPage.type==="category"&&<CategoryPage key={currentPage.id} category={currentPage.id} metadata={metadata} onSetMyUni={handleSetMyUni} myUniversity={myUniversity} onNavigate={setCurrentPage}/>}
                 {currentPage.type==="my-university"&&<MyUniversityPage myUniversity={myUniversity} metadata={metadata} onSetMyUni={handleSetMyUni} onClear={handleClearMyUni}/>}
                 {currentPage.type==="comparison"&&<ComparisonPage myUniversity={myUniversity} metadata={metadata}/>}
                 {currentPage.type==="ip-funnel"&&<IPFunnelPage myUniversity={myUniversity} metadata={metadata}/>}
