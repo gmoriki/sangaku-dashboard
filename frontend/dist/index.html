@@ -326,10 +326,14 @@
         .landing-nav{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) max(var(--space-12),8vw);width:100%;position:relative;z-index:2}
         .landing-logo{font-family:var(--font-display);font-size:var(--text-base);font-weight:700;color:rgba(255,255,255,.9)}
         .lp-hero{background:linear-gradient(160deg,#0C3B2A 0%,#061F16 100%);position:relative;overflow:hidden}
-        .lp-hero-inner{display:flex;align-items:center;gap:var(--space-10);min-height:calc(100svh - 48px);padding:var(--space-10) max(var(--space-12),8vw);position:relative;z-index:1}
-        .lp-hero-text{flex:1;text-align:left;max-width:480px}
+        .lp-hero-inner{display:flex;align-items:center;gap:var(--space-10);min-height:calc(100svh - 48px);padding:var(--space-8) max(var(--space-12),8vw);position:relative;z-index:1}
+        .lp-hero-text{flex:0 0 auto;text-align:left;max-width:420px}
         .lp-hero-preview{flex:1;position:relative;display:flex;align-items:center;justify-content:flex-end}
         .lp-hero-preview img{max-width:100%;border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,.1);display:block}
+        .lp-hero-features{display:flex;gap:var(--space-6);margin-top:var(--space-8)}
+        .lp-hero-feat{flex:1}
+        .lp-hero-feat-title{font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;color:rgba(255,255,255,.85);margin-bottom:var(--space-1)}
+        .lp-hero-feat-desc{font-size:var(--text-xs);color:rgba(255,255,255,.45);line-height:1.6}
         .lp-eyebrow{font-size:var(--text-xs);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:var(--space-5)}
         .lp-hero h1{font-family:var(--font-display);font-size:var(--text-3xl);font-weight:800;color:#fff;letter-spacing:var(--tracking-tight);line-height:var(--leading-tight);margin-bottom:var(--space-4)}
         .lp-hero-sub{font-size:var(--text-base);color:rgba(255,255,255,.6);line-height:1.8;max-width:480px;margin:0 0 var(--space-8)}
@@ -339,9 +343,7 @@
         .lp-stat-label{font-size:var(--text-xs);color:rgba(255,255,255,.45);margin-top:var(--space-2);font-weight:500}
         .lp-cta{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-10);background:var(--cta);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:var(--text-base);font-weight:700;cursor:pointer;transition:background var(--ease-normal)}
         .lp-cta:hover{background:var(--cta-hover)}
-        .lp-features-section{max-width:720px;margin:0 auto;padding:var(--space-12) var(--space-6)}
-        .lp-features-heading{text-align:left;font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;margin-bottom:var(--space-6);color:var(--text-1)}
-        .lp-features{display:flex;flex-direction:column;gap:var(--space-4)}
+        .lp-features-section{display:none}
         .lp-fcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);transition:background var(--ease-fast),border-color var(--ease-fast);position:relative;overflow:hidden}
         .lp-fcard::before{display:none}
         .lp-fcard:hover{background:var(--card-hover);border-color:var(--border-strong)}
@@ -392,6 +394,7 @@
             .chart-canvas-wrapper.radar{height:280px}
             .lp-hero-inner{padding:var(--space-10) var(--space-5);min-height:auto;flex-direction:column}
             .lp-hero-preview{display:none}
+            .lp-hero-features{flex-direction:column;gap:var(--space-3)}
             .lp-hero h1{font-size:var(--text-xl)}
             .lp-features-section{padding:var(--space-10) var(--space-5)}
             .lp-trust{padding:var(--space-6) var(--space-5)}
@@ -694,18 +697,15 @@ function LandingPage({onEnter,theme,onToggleTheme,onTermsOpen}){
                     <h1>産連調査、ひと目でわかる。</h1>
                     <p className="lp-hero-sub">1,102機関、7年分の産学連携データ。<br/>共同研究の件数から知財収入まで、自大学の全国順位がわかる。</p>
                     <button className="lp-cta" onClick={onEnter}>ダッシュボードを開く →</button>
+                    <div className="lp-hero-features anim-in anim-delay-3">
+                        <div className="lp-hero-feat"><div className="lp-hero-feat-title">マイ大学</div><div className="lp-hero-feat-desc">全国順位と強み・弱みがわかる</div></div>
+                        <div className="lp-hero-feat"><div className="lp-hero-feat-title">大学比較</div><div className="lp-hero-feat-desc">最大4校を指標ごとに比較</div></div>
+                        <div className="lp-hero-feat"><div className="lp-hero-feat-title">知財分析</div><div className="lp-hero-feat-desc">出願から収入まで一覧</div></div>
+                    </div>
                 </div>
                 <div className="lp-hero-preview anim-in anim-delay-2">
                     <img src="/hero-preview.png" alt="ダッシュボード画面" loading="eager"/>
                 </div>
-            </div>
-        </div>
-        <div className="lp-features-section anim-in anim-delay-3">
-            <div className="lp-features-heading">3つの分析機能</div>
-            <div className="lp-features">
-                <div className="lp-fcard"><div className="lp-fcard-header"><div className="lp-fcard-icon"><IC.building size={16}/></div><div className="lp-fcard-title">マイ大学</div></div><div className="lp-fcard-desc">大学を選ぶだけで、全国順位と強み・弱みがわかる。</div></div>
-                <div className="lp-fcard"><div className="lp-fcard-header"><div className="lp-fcard-icon"><IC.barChart size={16}/></div><div className="lp-fcard-title">大学比較</div></div><div className="lp-fcard-desc">最大4校を並べて、指標ごとに比較。</div></div>
-                <div className="lp-fcard"><div className="lp-fcard-header"><div className="lp-fcard-icon"><IC.shield size={16}/></div><div className="lp-fcard-title">知財分析</div></div><div className="lp-fcard-desc">出願から収入まで、知財の流れを一覧。</div></div>
             </div>
         </div>
         <div className="lp-trust">出典：文部科学省「産学連携等実施状況調査」/ 経済産業省「大学ファクトブック2026」 ｜ <span onClick={onTermsOpen} style={{cursor:"pointer",textDecoration:"underline"}}>利用について</span></div>
